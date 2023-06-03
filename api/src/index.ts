@@ -7,15 +7,9 @@ import { connectToMongo, connectToRedis } from './services/database.service';
 // Cors
 import cors from 'cors';
 // Controllers
-import statisticsRouter from './routes/statistics.route';
 import connectionsRouter from './routes/connections.route';
 import transactionsRouter from './routes/transactions.route';
-import realestateRouter from './routes/realestate.route';
-import nftmarketplaceRouter from './routes/nftmarketplace.route';
-import nftsRouter from './routes/nfts.route';
 import daoRouter from './routes/dao.route';
-import assetsRouter from './routes/assets.route';
-import collectionRouter from './routes/collections.route';
 import { getCosmWasmClient } from './services/wasmclient.service';
 
 // Initializes env variables
@@ -45,16 +39,10 @@ if(DAO_EXP_MODULE_ONLY && DAO_EXP_MODULE_ONLY.toLowerCase().startsWith('t')) {
 } else {
     // we only need MOngoDB if we use all the routes, excluding DAO/EXP
     connectToMongo(DB_CONN_STRING, DB_NAME);
-    // Setup all routers (including the DAO)
-    app.use('/v1/statistics', statisticsRouter);
+    // Setup all routers (including the DAO)    
     app.use('/v1/connections', connectionsRouter);
     app.use('/v1/tx', transactionsRouter);
-    app.use('/v1/marketplace', nftmarketplaceRouter)
-    app.use('/v1/realestate', realestateRouter)
-    app.use('/v1/nfts', nftsRouter)
     app.use('/v1/dao', daoRouter)
-    app.use('/v1/assets', assetsRouter)
-    app.use('/v1/collections', collectionRouter)
 }
 
 
@@ -69,27 +57,15 @@ app.get('/', (req, res) => {
             const daoRoutes = daoRouter.stack.map(({ route }) => `${urlStart}/v1/dao` + route.path)
             ROUTER_CACHE = { dao: daoRoutes }
         } else {
-            // Setup all endpoints, including the DAO endpoint
-            const statisticsRoutes = statisticsRouter.stack.map(({ route }) => `${urlStart}/v1/statistics` + route.path)
+            // Setup all endpoints, including the DAO endpoint            
             const connectionsRoutes = connectionsRouter.stack.map(({ route }) => `${urlStart}/v1/connections` + route.path)
-            const transactionsRoutes = transactionsRouter.stack.map(({ route }) => `${urlStart}/v1/tx` + route.path)
-            const nftmarketplaceRouters = nftmarketplaceRouter.stack.map(({ route }) => `${urlStart}/v1/marketplace` + route.path)
-            const nftsRoutes = nftsRouter.stack.map(({ route }) => `${urlStart}/v1/nfts` + route.path)
-            const realestateRoutes = realestateRouter.stack.map(({ route }) => `${urlStart}/v1/realestate` + route.path)
-            const daoRoutes = daoRouter.stack.map(({ route }) => `${urlStart}/v1/dao` + route.path)            
-            const assetsRoutes = assetsRouter.stack.map(({ route }) => `${urlStart}/v1/assets` + route.path)
-            const collectionRoutes = collectionRouter.stack.map(({ route }) => `${urlStart}/v1/collections` + route.path)
+            const transactionsRoutes = transactionsRouter.stack.map(({ route }) => `${urlStart}/v1/tx` + route.path)                        
+            const daoRoutes = daoRouter.stack.map(({ route }) => `${urlStart}/v1/dao` + route.path)                        
 
-            ROUTER_CACHE = {
-                statistics: statisticsRoutes,
+            ROUTER_CACHE = {                
                 connections: connectionsRoutes,
-                transactions: transactionsRoutes,            
-                nftmarketplace: nftmarketplaceRouters,
-                nfts: nftsRoutes,
-                realestate: realestateRoutes,
+                transactions: transactionsRoutes,                            
                 dao: daoRoutes,
-                assets: assetsRoutes,
-                collections: collectionRoutes
             }
         }
     }

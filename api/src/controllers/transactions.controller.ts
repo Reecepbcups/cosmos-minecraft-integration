@@ -29,21 +29,6 @@ export const signTransaction = async (req: Request, res: Response) => {
     else return res.status(400).json({ message: 'Transaction not found' });
 };
 
-// maybe reuse for something in the future, but this is done in game since the REST fix for /tx endpoint
-// export const confirmTransactionDetailsMatch = async (req: Request, res: Response) => {
-//     const { to_address, ucraft_amt, description, tendermint_hash } = req.params;
-//     // console.log(req.params);
-    
-//     let amountFormatted = ucraft_amt;
-//     if (ucraft_amt.toString().indexOf('ucraft') === -1) {
-//         amountFormatted += 'ucraft';
-//     }
-
-//     const doc = await confirmTransactionDataMatches(to_address, amountFormatted, description, tendermint_hash);
-//     if (doc) return res.status(200).json(doc);
-//     else return res.status(400).json({ message: 'Transaction not found' });
-// };
-
 export const removeTransaction = async (req: Request, res: Response) => {
     const { uuid } = req.params;
 

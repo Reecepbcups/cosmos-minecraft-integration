@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { createLink, doesLinkExist, getMCUUID } from '../services/connections.service';
 
+// TODO: We can just do keplrId and minecraftCode. UGH but I think that is closed source so I need to re-write it open without CraftCore & discordId.
 /**
  * Handles the creation of an account link
  * 

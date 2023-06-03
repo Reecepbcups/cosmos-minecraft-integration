@@ -1,5 +1,5 @@
 // Discord Webhook Notifications
-import { WebhookClient, MessageEmbed, ColorResolvable } from 'discord.js';
+import { WebhookClient, EmbedBuilder, ColorResolvable } from 'discord.js';
 
 // Env
 import { config } from 'dotenv';
@@ -10,12 +10,13 @@ const webhookClient = new WebhookClient({ url: `${process.env.CRAFT_DAO_ESCROW_W
 
 // send the webhooks, ColorResolvable can be a hex color code string
 export const sendDiscordWebhook = async (title: string, description: string, fields: {}, color: ColorResolvable) => {
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     embed.setTitle(title).setDescription(description).setColor(color);
     for(let key in fields) {
         // console.log(key, fields[key]);
-        embed.addField(key, fields[key]);
+        // embed.addField(key, fields[key]);
+        embed.addFields({ name: key, value: fields[key] });
     }
 
     webhookClient.send({

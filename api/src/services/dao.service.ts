@@ -1,6 +1,5 @@
 import { redisClient, collections } from './database.service';
 import { sendDiscordWebhook } from './discord.service';
-import { getPrice, getCraftUSDPrice } from './pricing.service';
 
 import axios from 'axios'; // TODO: use QueryClient bankExtension to query totalSupply
 
@@ -38,6 +37,7 @@ const prefixes = {
         denom: "uakt",
         coingecko: "akash-network",
     },
+    // lol dig
     "dig": {
         rpc: "https://rpc-1-dig.notional.ventures",
         denom: "udig",
@@ -47,77 +47,6 @@ const prefixes = {
 
 // https://github.com/cosmos/cosmjs/tree/main/packages/cli/examples
 
-/**
- * http://127.0.0.1:4000/v1/dao/get_wallet
- */
-export const getAllEndpoints = async () => {
-    const REDIS_KEY = `cache:dao_all_endpoints`;    
-    if (allowCache) {
-        let all_endpoints_data = await redisClient?.get(REDIS_KEY);
-        if (all_endpoints_data) {
-            return JSON.parse(all_endpoints_data);
-        }
-    }
-
-    // console.log("Signer address:", account.address);
-
-    let [exp_resp, craft_price, addresses] = await Promise.all([
-        getTotalSupply("uexp"),
-        getCraftUSDPrice(),
-        getWallets(),
-    ]);
-
-    if (exp_resp === -1) {
-        return undefined;
-    }
-
-    const uexp_total_supply = Number(exp_resp);
-    console.log("uexp_total_supply", uexp_total_supply);
-
-    // console.log(balance);
-
-    // gets all DAO wallets
-    // const addresses: string[] = await getWallets();
-
-    // loops through all DAO wallets, gets an RPC of that wallet from cache if found, connect & get balance
-    let ubalances, TOTAL_ASSETS = await getAssets();
-    // console.log(TOTAL_ASSETS);
-
-    // .total includes staked holdings
-    let TOTAL_USD_VALUE_OF_ASSETS = await getTotalUSDValue(TOTAL_ASSETS).then((total) => {
-        return total;
-    }).catch((err) => {
-        console.log(err);
-        return -1
-    });
-    console.log("TOTAL_USD_VALUE_OF_ASSETS", TOTAL_USD_VALUE_OF_ASSETS)
-
-    // http://65.108.125.182:1317/cosmos/bank/v1beta1/supply/by_denom?denom=uexp    
-    const ucraft_price = craft_price / 1_000_000;
-
-    const uexp_price = TOTAL_USD_VALUE_OF_ASSETS / uexp_total_supply;
-    const exp_price = TOTAL_USD_VALUE_OF_ASSETS / (uexp_total_supply/1_000_000);
-    
-
-    const returnValue = {
-        ESCROW_ACCOUNT: await getServersEscrowAccountInfo(),
-        ADDRESSES: addresses,
-        UBALANCES: ubalances,
-        TOTAL_ASSETS: TOTAL_ASSETS,
-        TOTAL_DAO_USD_VALUE: TOTAL_USD_VALUE_OF_ASSETS,
-        EXP_TOTAL_SUPPLY: uexp_total_supply / 1_000_000,
-        UEXP_TOTAL_SUPPLY: uexp_total_supply,        
-        PRICE_PER_EXP: exp_price,
-        PRICE_PER_UEXP: uexp_price,
-        PRICE_PER_CRAFT: craft_price,
-        PRICE_PER_UCRAFT: ucraft_price,
-    }    
-
-    if(allowCache) {
-        await redisClient.setEx(REDIS_KEY, 30, JSON.stringify(returnValue)); // 30 second cache
-    }
-    return returnValue;
-};
 
 export const getEscrowBalances = async () => {
     const REDIS_KEY = `cache:escrow_balances`;    
@@ -198,6 +127,7 @@ export const getServersEscrowAccountInfo = async () => {
     return data_format;
 }
 
+// TODO: Why?
 /**
  * @param coin String
  * @returns 
@@ -233,47 +163,6 @@ export const getTotalSupply = async (coin: string) => {
     }
 
     return value;
-}
-
-export const getTotalUSDValue = async (TOTAL_ASSETS?) => {
-    const REDIS_KEY = `cache:total_dao_usd_value`;
-    const TTL = 60 * 5;    
-    if (allowCache) {
-        let get_total_value = await redisClient?.get(REDIS_KEY);
-        if (get_total_value) {
-            console.log(`Total Value: $ ${get_total_value} found in redis cache -> ${REDIS_KEY}`);
-            return JSON.parse(get_total_value);
-        }
-    }
-
-    if (!TOTAL_ASSETS) {
-        TOTAL_ASSETS = await getAssets();
-    }
-
-    let TOTAL_USD_VALUE_OF_ASSETS = 0;
-    for (const asset in TOTAL_ASSETS.total) {
-        const asset_amount = TOTAL_ASSETS.total[asset];
-        const coingecko_id = prefixes[asset].coingecko;
-
-        console.log("Coingecko (asset, amount, cId): ", asset, asset_amount, coingecko_id);
-
-        const usd_price = await getPrice(coingecko_id);
-        const holdings_value = Number(usd_price * asset_amount);
-        TOTAL_USD_VALUE_OF_ASSETS += holdings_value;
-
-        console.log("getTotalUSDValue: (price, total)", usd_price, holdings_value)
-    }
-
-    // Save to cache
-    if(allowCache) {
-        await redisClient?.set(REDIS_KEY, JSON.stringify(TOTAL_USD_VALUE_OF_ASSETS));
-        await redisClient?.expire(REDIS_KEY, TTL);
-    }
-
-    // round total usd value to 2 decimal places
-    TOTAL_USD_VALUE_OF_ASSETS = Math.round(TOTAL_USD_VALUE_OF_ASSETS * 100) / 100;
-
-    return TOTAL_USD_VALUE_OF_ASSETS;
 }
 
 // escrow account
@@ -416,25 +305,6 @@ export const getAssets = async (addresses?) => {
     return { balance_only: ubalances, total: TOTAL_ASSETS }
 }
 
-export const getExpValueCalculation = async () => {
-    let [dao_usd_value, exp_supply] = await Promise.all([
-        getTotalUSDValue(),
-        getTotalSupply("uexp")
-    ]);
-
-
-    if (exp_supply) {
-        // get the number of it and / 1mil
-        exp_supply = Number(exp_supply) / 1_000_000;
-    }
-
-    const value = dao_usd_value / exp_supply;
-    if(value < 0) {
-        return -1;
-    }
-    return value;
-}
-
 export const getWallets = async () => {
     let DAO_ADDRS = `${process.env.DAO_WALLETS}`
     const addresses: string[] = [];
@@ -451,6 +321,7 @@ const getWalletAPrefix = (address: string) => {
 }
 
 
+// TODO: I should batch these every X blocks or something.
 /**
  * https://github.com/cosmos/cosmjs/blob/main/packages/cli/examples/local_faucet.ts
  * 
