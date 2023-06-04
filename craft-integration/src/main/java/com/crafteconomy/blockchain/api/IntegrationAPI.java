@@ -315,11 +315,6 @@ public class IntegrationAPI {
         return faucetUCraft(uuid, description, (long) (craft_amount*1_000_000));   
     }
 
-
-    public CompletableFuture<Float> getCraftUSDPrice() {
-        return EndpointQuery.queryCraftTokenPrice();
-    }
-
     // --------------------------------------------------
     // clickable links / commands / TxId's to make user life better
     public void sendWebappForSigning(CommandSender sender, String message, String hoverMsg) {

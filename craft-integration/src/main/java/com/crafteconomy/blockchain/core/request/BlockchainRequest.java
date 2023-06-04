@@ -95,26 +95,26 @@ public class BlockchainRequest {
 
 
     // -= TOTAL SUPPLY =-
-    public static CompletableFuture<Long> getTotalSupply(String denomination) {
-        CompletableFuture<Long> future = CompletableFuture.supplyAsync(new Supplier<Long>() {
-            @Override
-            public Long get() {
-                Object totalSupply = Caches.getIfPresent(RequestTypes.SUPPLY, denomination); 
-                if(totalSupply != null) { return (long) totalSupply; }
+    // public static CompletableFuture<Long> getTotalSupply(String denomination) {
+    //     CompletableFuture<Long> future = CompletableFuture.supplyAsync(new Supplier<Long>() {
+    //         @Override
+    //         public Long get() {
+    //             Object totalSupply = Caches.getIfPresent(RequestTypes.SUPPLY, denomination); 
+    //             if(totalSupply != null) { return (long) totalSupply; }
 
-                String URL = SUPPLY_ENDPOINT.replace("%denomination%", denomination);
-                long supply = Long.parseLong(EndpointQuery.req(URL, RequestTypes.SUPPLY, "Total Supply Request").toString());
+    //             String URL = SUPPLY_ENDPOINT.replace("%denomination%", denomination);
+    //             long supply = Long.parseLong(EndpointQuery.req(URL, RequestTypes.SUPPLY, "Total Supply Request").toString());
 
-                Caches.put(RequestTypes.SUPPLY, denomination, supply);
-                return supply;
-            }
-        });                
-        return future;
-    }
+    //             Caches.put(RequestTypes.SUPPLY, denomination, supply);
+    //             return supply;
+    //         }
+    //     });                
+    //     return future;
+    // }
 
-    public static CompletableFuture<Long> getTotalSupply() {
-        return getTotalSupply(blockchainPlugin.getTokenDenom());
-    }
+    // public static CompletableFuture<Long> getTotalSupply() {
+    //     return getTotalSupply(blockchainPlugin.getTokenDenom());
+    // }
 
     // -= GIVING TOKENS =-
     private static final String ENDPOINT_SECRET = CraftBlockchainPlugin.getInstance().getSecret();

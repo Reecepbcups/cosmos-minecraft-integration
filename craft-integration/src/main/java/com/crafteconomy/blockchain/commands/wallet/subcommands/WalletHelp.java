@@ -16,8 +16,7 @@ public class WalletHelp implements SubCommand {
     private final String[] HELP_MESSAGES = {
         "help",
         "balance <player / wallet-address>",        
-        "pay <player|UUID|wallet> <amount>", 
-        "supply",
+        "pay <player|UUID|wallet> <amount>",         
         "pending",
         "clearpending",
     };

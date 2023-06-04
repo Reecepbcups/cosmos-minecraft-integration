@@ -16,9 +16,7 @@ import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletMyPendingTx
 import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletOutputPendingTxs;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletSend;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletSet;
-import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletSupply;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.WalletWebapp;
-import com.crafteconomy.blockchain.commands.wallet.subcommands.debugging.CraftTokenPrice;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.debugging.WalletFakeSign;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.debugging.WalletGenerateFakeTx;
 import com.crafteconomy.blockchain.commands.wallet.subcommands.debugging.WalletMultipleTxTesting;
@@ -39,9 +37,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import redis.clients.jedis.Jedis;
-
-// CraftBlockchainPlugin.java Task:
-// +whitelist http://ENDPOINT:4500/ to only our machines ip [since only DOA needs it for Quest and Such]. BE SUPER CAREFUL
 
 // ********* IMPORTANT *********
 // Ensure redis-cli -> `CONFIG SET notify-keyspace-events K$` (KEA also works)
@@ -67,7 +62,8 @@ public class CraftBlockchainPlugin extends JavaPlugin {
 
     private String DAO_SERVER_WALLET = null;
     private String REST_API_WALLET_ADDRESS = null;
-    private String API_MAKE_PAYMENT_ENDPOINT = "http://api.crafteconomy.io/v1/dao/make_payment";
+    private String INTERNAL_API = null;
+    private String API_MAKE_PAYMENT_ENDPOINT = INTERNAL_API + "/v1/dao/make_payment";
 
     private BukkitTask redisPubSubTask = null;
     private Jedis jedisPubSubClient = null;
@@ -103,6 +99,15 @@ public class CraftBlockchainPlugin extends JavaPlugin {
         log(redisDB.getRedisConnection().ping());
         log("" + mongoDB.getDatabase().getCollection("connections").countDocuments());
 
+        INTERNAL_API = getConfig().getString("INTERNAL_API");
+        if(INTERNAL_API.endsWith("/")) {
+            INTERNAL_API = INTERNAL_API.substring(0, INTERNAL_API.length() - 1);
+        }
+        // ensure it has http at the start
+        if(!INTERNAL_API.startsWith("http")) {            
+            log("INTERNAL_API does not start with http, adding it now. May fail who knows. Update this", Level.SEVERE);
+            INTERNAL_API = "http://" + INTERNAL_API;
+        }
 
         DAO_SERVER_WALLET = getConfig().getString("DAO_TAX_WALLET_ADDRESS"); // DAO_TAX_WALLET_ADDRESS
         REST_API_WALLET_ADDRESS = getConfig().getString("REST_API_WALLET_ADDRESS");
@@ -149,8 +154,7 @@ public class CraftBlockchainPlugin extends JavaPlugin {
 
         cmd.registerCommand("help", new WalletHelp());
         cmd.registerCommand(new String[] {"b", "bal", "balance"}, new WalletBalance());
-        cmd.registerCommand(new String[] {"set", "setwallet"}, new WalletSet());
-        cmd.registerCommand(new String[] {"supply"}, new WalletSupply());
+        cmd.registerCommand(new String[] {"set", "setwallet"}, new WalletSet());        
         cmd.registerCommand(new String[] {"faucet", "deposit"}, new WalletFaucet());
         cmd.registerCommand(new String[] {"pay", "send"}, new WalletSend());
         cmd.registerCommand(new String[] {"webapp"}, new WalletWebapp());
@@ -162,12 +166,10 @@ public class CraftBlockchainPlugin extends JavaPlugin {
         cmd.registerCommand(new String[] {"fakesign"}, new WalletFakeSign());
         cmd.registerCommand(new String[] {"allpending", "allkeys"}, new WalletOutputPendingTxs());
         cmd.registerCommand(new String[] {"mypending", "pending", "mykeys", "keys"}, new WalletMyPendingTxs());
-        cmd.registerCommand(new String[] {"clearpending", "clear"}, new WalletClearPending());
-
-        cmd.registerCommand(new String[] {"price"}, new CraftTokenPrice());
+        cmd.registerCommand(new String[] {"clearpending", "clear"}, new WalletClearPending());        
 
         // arg[0] commands which will tab complete
-        cmd.addTabComplete(new String[] {"balance","setwallet","supply","send","pending","webapp"});
+        cmd.addTabComplete(new String[] {"balance","setwallet","send","pending","webapp"});
 
         // Escrow Commands
         EscrowCMD escrowCMD = new EscrowCMD();

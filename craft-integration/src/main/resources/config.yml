@@ -1,3 +1,6 @@
+# Ensure redis-cli -> `CONFIG SET notify-keyspace-events K$` (KEA also works)
+# notify-keyspace-events = "KEA" in /etc/redis/redis.conf
+
 # http://api.crafteconomy.io/v1/dao/escrow_account_info
 REST_API_WALLET_ADDRESS: juno1efd63aw40lxf3n4mhf7dzhjkr453axurv2zdzk
 # DAO Mutlisig account
@@ -5,6 +8,7 @@ REST_API_WALLET_ADDRESS: juno1efd63aw40lxf3n4mhf7dzhjkr453axurv2zdzk
 DAO_TAX_WALLET_ADDRESS: juno1hj5fveer5cjtn4wd6wstzugjfdxzl0xps73ftl
 
 # API_MAKE_PAYMENT_ENDPOINT: http://api.crafteconomy.io/v1/dao/make_payment
+INTERNAL_API: "http://localhost:4000"
 API_MAKE_PAYMENT_ENDPOINT: http://localhost:4000/v1/dao/make_payment
 REDIS_KEY_EXPIRE_TIME: 0
 TX_QUERY_ENDPOINT: https://api.juno.strange.love/cosmos/tx/v1beta1/txs/{TENDERMINT_HASH}
