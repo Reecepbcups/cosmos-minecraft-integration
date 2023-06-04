@@ -18,7 +18,7 @@ public class CraftTokenPrice implements SubCommand {
 
         api.getCraftUSDPrice().thenAccept(price -> {
             if(price > 0) {
-                Util.colorMsg(sender, "\n&a&lCRAFT TOKEN PRICE: &f$" + price);
+                Util.colorMsg(sender, "\n&a&l"+api.getTokenName().toUpperCase()+" TOKEN PRICE: &f$" + price);
             } else {
                 Util.colorMsg(sender, "\n&c&lToken price service is currently down");
             }

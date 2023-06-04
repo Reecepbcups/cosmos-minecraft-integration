@@ -25,7 +25,8 @@ import org.json.JSONObject;
 
 public class SignedTxCheckListener implements Listener {
 
-    RedisManager redis = CraftBlockchainPlugin.getInstance().getRedis();
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
+    RedisManager redis = plugin.getRedis();
 
     private static String TX_ENDPOINT = CraftBlockchainPlugin.getTxQueryEndpoint();
     private static Boolean IS_DEV_MODE = CraftBlockchainPlugin.getIfInDevMode();
@@ -46,12 +47,12 @@ public class SignedTxCheckListener implements Listener {
         String expectedDesc = tx.getDescription();
         long expected_ucraft = tx.getUCraftAmount(); 
         String expectedToWallet = tx.getToWallet();
-        boolean doesMatch = doesDataMatchTransaction(event.getTednermintHash(), expectedToWallet, expected_ucraft, expectedDesc);
+        boolean doesMatch = doesDataMatchTransaction(event.getTednermintHash(), expectedToWallet, expected_ucraft, expectedDesc, plugin.getTokenDenom());
 
         // CraftBlockchainPlugin.log("[SignedTransactionEvent] Comparing our tx description -> the memo in the body of the transaction");        
         if(doesMatch == false) {
             CraftBlockchainPlugin.log("[DEBUG] TxData did not match for:" + TxID + " - " + event.getTednermintHash(), Level.SEVERE);
-            CraftBlockchainPlugin.log("[DEBUG] ACTUAL: desc: " + expectedDesc + "  amount (ucraft): " + expected_ucraft + "  toWallet: " + expectedToWallet);
+            CraftBlockchainPlugin.log("[DEBUG] ACTUAL: desc: " + expectedDesc + "  amount (token): " + expected_ucraft + "  toWallet: " + expectedToWallet);
             return;
         }                
         CraftBlockchainPlugin.log("SignedTransactionEvent [DATA MATCH] found for " + TxID.toString().substring(0, 15) + "... Completing\n", Level.SEVERE);
@@ -81,7 +82,7 @@ public class SignedTxCheckListener implements Listener {
 
 
     // protected static String CRAFT_URL = "http://65.108.125.182:1317/cosmos/tx/v1beta1/txs/{TENDERMINT_HASH}";
-    private static boolean doesDataMatchTransaction(String tendermintHash, String expectedToAddress, long expectedAmount, String expectedMemo) {
+    private static boolean doesDataMatchTransaction(String tendermintHash, String expectedToAddress, long expectedAmount, String expectedMemo, String token) {
         boolean transactionDataMatches = false;        
         boolean doesTxMemoMatch = false;
 
@@ -121,7 +122,7 @@ public class SignedTxCheckListener implements Listener {
                 JSONObject tempAmount = (JSONObject) amounts;
                 Long msgAmount = tempAmount.getLong("amount");                    
                 if(msgAmount == expectedAmount) {
-                    CraftBlockchainPlugin.log("TXHASH - Found a matching amount of " + msgAmount +"ucraft. This makes it a valid Tx if memo is correct: " + doesTxMemoMatch);
+                    CraftBlockchainPlugin.log("TXHASH - Found a matching amount of " + msgAmount + token + ". This makes it a valid Tx if memo is correct: " + doesTxMemoMatch);
                     transactionDataMatches = true;
                     break;
                 }

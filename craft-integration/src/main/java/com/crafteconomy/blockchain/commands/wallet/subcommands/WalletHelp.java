@@ -10,11 +10,12 @@ import org.bukkit.entity.Player;
 
 public class WalletHelp implements SubCommand {
 
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
     WalletManager walletManager = WalletManager.getInstance();
 
     private final String[] HELP_MESSAGES = {
         "help",
-        "balance <player / craft_address>",        
+        "balance <player / wallet-address>",        
         "pay <player|UUID|wallet> <amount>", 
         "supply",
         "pending",
@@ -22,8 +23,8 @@ public class WalletHelp implements SubCommand {
     };
     
     private final String[] ADMIN_HELP_MESSAGES = {  
-        "set <craft-wallet> &4[Players do this via website only].",      
-        "faucet <name|wallet> <amount> &7- &fDeposit craft to wallet.",
+        "set <"+plugin.getTokenDenomName().toLowerCase()+"-wallet> &4[Players do this via website only].",      
+        "faucet <name|wallet> <amount> &7- &fDeposit token to wallet.",
         "faketx <license/purchase> [item] &7- &4[TEMP].",
         "fakesign <Generated_TxID> &7- &4[TEMP].",
         "allpending &7- &4[TEMP].",
@@ -33,7 +34,7 @@ public class WalletHelp implements SubCommand {
     
     @Override
     public void onCommand(CommandSender sender, String[] args) {
-        Util.colorMsg(sender, "\n&a&lCRAFT ECONOMY &f&lWALLET");
+        Util.colorMsg(sender, "\n&f&l"+plugin.getTokenDenomName()+" WALLET");
 
         if(sender instanceof Player) {
             Player player = (Player) sender;
@@ -41,7 +42,7 @@ public class WalletHelp implements SubCommand {
             if(WALLET == null) {
                 Util.clickableWebsite(sender, "https://docs.crafteconomy.io/set-up/wallet", 
                     "&2[!] &a&nClick here to learn how to set up your wallet.",
-                    "&7&oSetup your CRAFT wallet with Keplr"    
+                    "&7&oSetup your wallet with Keplr"    
                 );
             } else {
                 Util.clickableCopy(sender, WALLET, " &f-> &7%value%", "&7&oClick to copy wallet address");

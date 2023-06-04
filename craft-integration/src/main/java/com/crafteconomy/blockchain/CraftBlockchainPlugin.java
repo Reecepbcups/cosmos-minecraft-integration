@@ -49,6 +49,12 @@ import redis.clients.jedis.Jedis;
 
 public class CraftBlockchainPlugin extends JavaPlugin {
 
+    // TODO: config.yml
+    private static final String WALLET_PREFIX = "juno";    
+    private static final String TOKEN_DENOM = "ujuno";    
+    private static final String TOKEN_DENOM_NAME = "Juno";    
+
+
     private static CraftBlockchainPlugin instance;
 
     private static RedisManager redisDB;
@@ -158,7 +164,7 @@ public class CraftBlockchainPlugin extends JavaPlugin {
         cmd.registerCommand(new String[] {"mypending", "pending", "mykeys", "keys"}, new WalletMyPendingTxs());
         cmd.registerCommand(new String[] {"clearpending", "clear"}, new WalletClearPending());
 
-        cmd.registerCommand(new String[] {"craft", "craftprice"}, new CraftTokenPrice());
+        cmd.registerCommand(new String[] {"price"}, new CraftTokenPrice());
 
         // arg[0] commands which will tab complete
         cmd.addTabComplete(new String[] {"balance","setwallet","supply","send","pending","webapp"});
@@ -258,10 +264,17 @@ public class CraftBlockchainPlugin extends JavaPlugin {
     }
 
     public String getWalletPrefix() {        
-        return "craft"; 
-    }
+        return WALLET_PREFIX; 
+    }    
     public int getWalletLength() {    
         return 39 + getWalletPrefix().length();
+    }
+
+    public String getTokenDenom() {        
+        return TOKEN_DENOM; 
+    }
+    public String getTokenDenomName() {        
+        return TOKEN_DENOM_NAME; 
     }
 
     public String getWebappLink() {

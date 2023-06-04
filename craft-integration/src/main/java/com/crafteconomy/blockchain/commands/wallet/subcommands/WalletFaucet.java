@@ -17,8 +17,10 @@ import org.bukkit.entity.Player;
 
 public class WalletFaucet implements SubCommand {
 
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
+
     WalletManager walletManager = WalletManager.getInstance();
-    int requiredWalletLength = CraftBlockchainPlugin.getInstance().getWalletLength();
+    int requiredWalletLength = plugin.getWalletLength();
 
     @Override
     public void onCommand(CommandSender sender, String[] args) {        
@@ -38,7 +40,7 @@ public class WalletFaucet implements SubCommand {
         wallet = args[1];
 
         // If they are requesting to give to a player
-        if(!wallet.startsWith("craft")) {
+        if(!wallet.startsWith(plugin.getWalletPrefix())) {
             // not a wallet, check if it is a user. if so, get their wallet
             wallet = walletManager.getAddressFromName(args[1]);
 
@@ -82,11 +84,11 @@ public class WalletFaucet implements SubCommand {
 
             if(faucet_status == FaucetTypes.SUCCESS) {
                 if(sender instanceof ConsoleCommandSender) {
-                    Util.colorMsg(sender, "&fPayment Success! &fFauceted +" + finalAmount + "craft to their wallet: &a" + reducedWallet);                    
+                    Util.colorMsg(sender, "&fPayment Success! &fFauceted +" + finalAmount + plugin.getTokenDenomName() + " to their wallet: &a" + reducedWallet);                    
                 }
                 
                 if(receiver != null && receiver.isOnline()) {
-                    Util.colorMsg(receiver, "&aIncoming Payment! &fYou received +" + finalAmount + "craft to your wallet: &a" + reducedWallet);
+                    Util.colorMsg(receiver, "&aIncoming Payment! &fYou received +" + finalAmount + plugin.getTokenDenomName() + " to your wallet: &a" + reducedWallet);
                 }                
             } else {
                 Util.colorMsg(sender, "&c&o[!] ERROR: payment request failed for " + reducedWallet + ". Error: " + faucet_status);

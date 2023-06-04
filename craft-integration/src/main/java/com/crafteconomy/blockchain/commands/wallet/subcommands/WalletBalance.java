@@ -19,9 +19,11 @@ import org.bukkit.entity.Player;
 
 public class WalletBalance implements SubCommand {
 
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
+
     WalletManager walletManager = WalletManager.getInstance();
-    String walletPrefix = CraftBlockchainPlugin.getInstance().getWalletPrefix();
-    int walletLength = CraftBlockchainPlugin.getInstance().getWalletLength();
+    String walletPrefix = plugin.getWalletPrefix();
+    int walletLength = plugin.getWalletLength();
 
     @Override
     public void onCommand(CommandSender sender, String[] args) {
@@ -95,7 +97,7 @@ public class WalletBalance implements SubCommand {
                     if(their_username != null) {
                         Util.colorMsg(sender, their_username + " has " + amount + walletPrefix);
                     } else {
-                        Util.colorMsg(sender, "You have " + amount + "craft");
+                        Util.colorMsg(sender, "You have " + amount + " " + plugin.getTokenDenom());
                     }
 
                     if(their_wallet != null) {
@@ -133,7 +135,7 @@ public class WalletBalance implements SubCommand {
                     return "&c[!] Blockchain is currently down, please try again later.";
                 }
 
-                return wallet + " has " + craft_amount + "craft";
+                return wallet + " has " + craft_amount + " " + plugin.getTokenDenomName();
             }
         });        
     }

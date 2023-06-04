@@ -26,7 +26,7 @@ import org.bukkit.inventory.ItemStack;
 // Only 1 user should sign (the 'net' sender of craft coins)
 // Ex: Reece trades 1 craft + 1 diamond to Chalabi
 // Chalabi trades 2 craft & 1 dirt to Reece.
-// This means net, Chalabi sends 1 craft to reece, so he is the signer of the Tx.
+// This means net, Chalabi sends 1 token to reece, so he is the signer of the Tx.
 // If net = 0, no signing is needed the transaction can just happen.
 
 public class TradeCommand implements CommandExecutor {
@@ -55,7 +55,7 @@ public class TradeCommand implements CommandExecutor {
         } 
 
         if(args.length != 2) {
-            Util.colorMsg(sender, "&7&o(( Trades item in hands + sends CRAFT from sender to receiver ))");
+            Util.colorMsg(sender, "&7&o(( Trades item in hands + sends "+api.getTokenName()+" from sender to receiver ))");
             Util.colorMsg(sender, "Usage: /test-trade <player> <amount>");
             Util.colorMsg(sender, "Usage: /test-trade accept");
             return true;
@@ -84,10 +84,10 @@ public class TradeCommand implements CommandExecutor {
             return true;
         }
 
-        // Check to ensure user has enough CRAFT to actually send that much
+        // Check to ensure user has enough token to actually send that much
         // float craft_amount = Float.parseFloat(args[1]);
         // if(api.getCraftBalance(from.getUniqueId()) < craft_amount) {
-        //     Util.colorMsg(sender, "&c&oYou do not have enough CRAFT");
+        //     Util.colorMsg(sender, "&c&oYou do not have enough tokens");
         //     return true;
         // }
 
@@ -130,7 +130,7 @@ public class TradeCommand implements CommandExecutor {
         receiver.updateInventory();
         
         // set values for transaction now that we know the user accepted the trade
-        tx.setDescription("Traded " + p1Item.getType() + " +" + tx.getCraftAmount() + "craft FOR " + receiver.getName() + "'s " + p2Item.getType());
+        tx.setDescription("Traded " + p1Item.getType() + " +" + tx.getCraftAmount() + " " + api.getTokenName() + " FOR " + receiver.getName() + "'s " + p2Item.getType());
         tx.setBiFunction(Logic.trade(tx.getFromUUID(), playerWhoAcceptedTrade, p1Item, p2Item, tx.getDescription()));
         tx.setToWallet(toWallet);
 

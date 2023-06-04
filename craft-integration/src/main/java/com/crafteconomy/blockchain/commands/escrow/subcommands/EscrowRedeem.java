@@ -31,7 +31,7 @@ public class EscrowRedeem implements SubCommand {
             return;
         }
 
-        // takes in game CRAFT held balance & deposits into their CRAFTA wallet address account
+        // takes in game token held balance & deposits into their CRAFTA wallet address account
         // if redeemAmount > what they have in escrow, we make the Tx match their escrow balance
         // async under the hood for actual payment
         // long redeemedAmount = api.escrowCraftRedeem(player.getUniqueId(), redeemAmount); // we do this notification in the redeem section now     

@@ -31,6 +31,9 @@ public class IntegrationAPI {
     private final String SERVER_WALLET, ESCROW_WALLET_REST_API; 
     private final String webappAddress;
     private final String SERVER_NAME;
+    private final String TOKEN_DENOM_NAME;
+    private final String TOKEN_DENOM;
+
     private IntegrationAPI() {    
         blockchainPlugin = CraftBlockchainPlugin.getInstance();
 
@@ -50,6 +53,16 @@ public class IntegrationAPI {
             throw new IllegalStateException("SIGNING_WEBAPP_LINK is not set in config.yml");
         }
 
+        TOKEN_DENOM_NAME = blockchainPlugin.getTokenDenomName();
+        if(TOKEN_DENOM_NAME == null) {
+            throw new IllegalStateException("TOKEN_DENOM_NAME is not set in main file.");
+        }
+        
+        TOKEN_DENOM = blockchainPlugin.getTokenDenom();
+        if(TOKEN_DENOM == null) {
+            throw new IllegalStateException("TOKEN_DENOM is not set in main file.");
+        }
+
         SERVER_NAME = CraftBlockchainPlugin.SERVER_NAME;
     }
 
@@ -67,6 +80,14 @@ public class IntegrationAPI {
      */
     public String getServerName() {
         return SERVER_NAME;
+    }
+    
+    public String getTokenName() {
+        return TOKEN_DENOM_NAME;
+    }
+
+    public String getTokenDenom() {
+        return TOKEN_DENOM_NAME;
     }
 
     /**
@@ -88,7 +109,7 @@ public class IntegrationAPI {
     }
 
     /**
-     * Gets a players String wallet address (starts with 'craft' & is 44 char long)
+     * Gets a players String wallet address (starts with 'prefix' & is X char long)
      * @param player_uuid
      * @return
      */
@@ -132,16 +153,16 @@ public class IntegrationAPI {
      * @param craft_amount
      * @return
      */
-    public long convertCraftToUCRAFT(float craft_amount) {
-        return (long)craft_amount * 1_000_000;
+    public long convertCraftToUCRAFT(float human_amount) {
+        return (long)human_amount * 1_000_000;
     }
 
     /**
      * Best to be used for displaying only
      * @return Float of CRAFT amount to be human readable
      */
-    public float convertUCRAFTtoBeReadable(long ucraft){
-        return ((float)ucraft / 1_000_000);
+    public float convertUCRAFTtoBeReadable(long token){
+        return ((float)token / 1_000_000);
     }
 
     /**
@@ -158,13 +179,13 @@ public class IntegrationAPI {
     }
 
     /**
-     * Gets the ucraft balance of a player based on their wallet address
+     * Gets the token balance of a player based on their wallet address
      * @param player_uuid
      * @return
      */
     public CompletableFuture<Float> getCraftBalance(UUID player_uuid) {
         // return getUCraftBalance(player_uuid) / 1_000_000;
-        return getUCraftBalance(player_uuid).thenApply(ucraft -> convertUCRAFTtoBeReadable(ucraft));
+        return getUCraftBalance(player_uuid).thenApply(token -> convertUCRAFTtoBeReadable(token));
     }
 
     /**
@@ -207,8 +228,8 @@ public class IntegrationAPI {
     /**
      * Send Tokens to another player/wallet. Blockchain integration will run the callback
      * @param from_uuid     Who it is from
-     * @param to_wallet     Who to send the CRAFT tokens too
-     * @param amount        Amount of craft to send
+     * @param to_wallet     Who to send the tokens too
+     * @param amount        Amount of token to send
      * @param description   What this transaction is for
      * @param callback      Function to run for the sender once completed
      * @return Tx
@@ -247,7 +268,7 @@ public class IntegrationAPI {
     /**
      * Creates a transaction which pays tokens back to the servers main wallet
      * @param from_uuid     Who it is from
-     * @param amount        Amount of craft to send
+     * @param amount        Amount of token to send
      * @param description   What this transaction is for
      * @param callback      Function to run for the sender once completed
      * @return              The Transaction (Tx) object
@@ -266,17 +287,17 @@ public class IntegrationAPI {
     }
 
     /**
-     * Gives a wallet some tokens (UCRAFT) 
+     * Gives a wallet some tokens (utoken) 
      * @param wallet_address
      * @param amount
      * @return  CompletableFuture<FaucetTypes>
      */
-    public CompletableFuture<FaucetTypes> faucetUCraft(String wallet_address, String description, long ucraft) {
-        return BlockchainRequest.depositUCraftToAddress(wallet_address, description, ucraft);   
+    public CompletableFuture<FaucetTypes> faucetUCraft(String wallet_address, String description, long utoken) {
+        return BlockchainRequest.depositUCraftToAddress(wallet_address, description, utoken);   
     }
 
     /**
-     * Gives a wallet some tokens (CRAFT) 
+     * Gives a wallet some tokens
      * @param consoleSender
      * @param player_uuid
      * @param amount
@@ -286,8 +307,8 @@ public class IntegrationAPI {
         return faucetUCraft(wallet_address, description, (long) (craft_amount*1_000_000));   
     }
 
-    public CompletableFuture<FaucetTypes> faucetUCraft(UUID uuid, String description, long ucraft) {
-        return BlockchainRequest.depositUCraftToAddress(walletManager.getAddress(uuid), description, ucraft);   
+    public CompletableFuture<FaucetTypes> faucetUCraft(UUID uuid, String description, long utoken) {
+        return BlockchainRequest.depositUCraftToAddress(walletManager.getAddress(uuid), description, utoken);   
     }
     
     public CompletableFuture<FaucetTypes> faucetCraft(UUID uuid, String description, float craft_amount) {
@@ -370,17 +391,17 @@ public class IntegrationAPI {
      * Each escrow is redeemable for 1x craft, its deposit rate
      */
     public EscrowErrors escrowUCraftDeposit(UUID playerUUID, long ucraft_amount) {
-        // creates a Tx to send CRAFT to DAO. On sign, player gets escrow balance
+        // creates a Tx to send token to DAO. On sign, player gets escrow balance
         return EscrowManager.getInstance().depositUCraft(playerUUID, ucraft_amount);
     }
     public EscrowErrors escrowCraftDeposit(UUID playerUUID, float craft_amount) {
-        // creates a Tx to send CRAFT to DAO. On sign, player gets escrow balance
+        // creates a Tx to send token to DAO. On sign, player gets escrow balance
         return escrowUCraftDeposit(playerUUID, (long) (craft_amount * 1_000_000));
     }
 
-    public long escrowUCraftRedeem(UUID playerUUID, long ucraft_amount) {
-        // If player has enough escrow, their wallet is paid in ucraft & escrow is subtracted
-        return EscrowManager.getInstance().redeemUCraft(playerUUID, ucraft_amount);
+    public long escrowUCraftRedeem(UUID playerUUID, long utoken) {
+        // If player has enough escrow, their wallet is paid in token & escrow is subtracted
+        return EscrowManager.getInstance().redeemUCraft(playerUUID, utoken);
     }
     public long escrowCraftRedeem(UUID playerUUID, float craft_amount) {
         return escrowUCraftRedeem(playerUUID, (long)(craft_amount*1_000_000));

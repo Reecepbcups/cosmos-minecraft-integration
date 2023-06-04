@@ -23,16 +23,16 @@ public class EscrowSpendExample implements CommandExecutor {
         Player player = (Player) sender;
 
         ItemStack itemToGivePlayer = new ItemStack(Material.DIRT, 5);
-        long cost = 1; // 10 craft
+        long cost = 1; // 10 token
 
         EscrowErrors err = api.escrowCraftSpend(player.getUniqueId(), cost);
         if(err == EscrowErrors.SUCCESS) {
             player.getInventory().addItem(itemToGivePlayer);
-            player.sendMessage("You have successfully spent " + cost + " escrow craft.");
+            player.sendMessage("You have successfully spent " + cost + " escrow " + api.getTokenName());
             
         } else {
             player.sendMessage("You do not have enough escrow balance to spend " + cost + ".");
-            player.sendMessage("You only have " + api.escrowGetCraftBalance(player.getUniqueId()) + "escrow craft.");
+            player.sendMessage("You only have " + api.escrowGetCraftBalance(player.getUniqueId()) + "escrow " + api.getTokenName());
         }
 
 

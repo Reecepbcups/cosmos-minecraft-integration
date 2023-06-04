@@ -16,8 +16,8 @@ public class EscrowBalance implements SubCommand {
     public void onCommand(CommandSender sender, String[] args) {
         Player player = (Player) sender;
 
-        String craftString = "&eEscrow balance is: " + api.escrowGetCraftBalance(player.getUniqueId()) + "craft. ";
-        craftString += "&7&o( ucraft = "+ api.escrowGetUCraftBalance(player.getUniqueId()) + " )";
+        String craftString = "&eEscrow balance is: " + api.escrowGetCraftBalance(player.getUniqueId()) + api.getTokenName() + ". ";
+        craftString += "&7&o( "+api.getTokenDenom()+" = "+ api.escrowGetUCraftBalance(player.getUniqueId()) + " )";
         Util.colorMsg(sender, craftString);
         return;
     }

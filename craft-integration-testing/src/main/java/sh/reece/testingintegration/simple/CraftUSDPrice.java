@@ -18,7 +18,7 @@ public class CraftUSDPrice implements CommandExecutor {
         Player player = (Player) sender;
 
         api.getCraftUSDPrice().thenAccept(price -> {
-            player.sendMessage("The current craft USD price is: $" + price);
+            player.sendMessage("The current "+api.getTokenName()+" USD price is: $" + price);
         });
 
         return true;

@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class WalletSet implements SubCommand {
-    // wallet set <craft-wallet-address>
+    // wallet set <wallet-address>
 
     WalletManager walletManager = WalletManager.getInstance();    
 
@@ -31,7 +31,7 @@ public class WalletSet implements SubCommand {
         }
 
         if(args.length != 2) {
-            Util.colorMsg(sender, "&cUsage: &f/wallet set <craft-wallet>");
+            Util.colorMsg(sender, "&cUsage: &f/wallet set <wallet-address>");
             Util.clickableWebsite(sender, "https://docs.crafteconomy.io/set-up/wallet", 
                 "&2[!] &a&nClick here to learn how to set up your wallet.",
                 "&7&oView the crafteconomy documentation"    
@@ -39,7 +39,7 @@ public class WalletSet implements SubCommand {
             return;       
         } 
 
-        // gets last argument which is the craft wallet address
+        // gets last argument which is the wallet address
         String newWallet = args[1]; 
 
         if(!WalletManager.isValidWallet(newWallet)) {

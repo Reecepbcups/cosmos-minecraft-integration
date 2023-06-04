@@ -74,7 +74,7 @@ public class MyExampleTransaction implements CommandExecutor {
             
             // } 
             // else {
-            //     Util.colorMsg(player, "You do not have 10 craft to purchase a business license");
+            //     Util.colorMsg(player, "You do not have 10 token to purchase a business license");
             // }
         });
          

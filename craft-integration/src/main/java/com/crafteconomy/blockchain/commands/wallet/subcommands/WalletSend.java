@@ -23,6 +23,8 @@ import org.bukkit.entity.Player;
 
 public class WalletSend implements SubCommand {
 
+
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
     WalletManager walletManager = WalletManager.getInstance();
     int RedisMinuteTTL = CraftBlockchainPlugin.getRedisMinuteTTL();
 
@@ -79,7 +81,7 @@ public class WalletSend implements SubCommand {
         txInfo.setToWallet(TO);
         txInfo.setCraftAmount(CRAFT_AMOUNT);
         txInfo.setDescription(player.getName() + " sent " + CRAFT_AMOUNT + " to " + args[1]);
-        txInfo.setFunction(getConsumerMessage("&a&lSUCCESS: &fYou have sent " + CRAFT_AMOUNT + "CRAFT to " + args[1]));
+        txInfo.setFunction(getConsumerMessage("&a&lSUCCESS: &fYou have sent " + CRAFT_AMOUNT + plugin.getTokenDenomName() + " to " + args[1]));
         txInfo.setRedisMinuteTTL(RedisMinuteTTL);
 
         ErrorTypes error = BlockchainRequest.transaction(txInfo);
@@ -89,7 +91,7 @@ public class WalletSend implements SubCommand {
             return;
         }
 
-        Util.colorMsg(sender, "\nTx for " + CRAFT_AMOUNT + "craft->" + TO.subSequence(0, 16) + "...");
+        Util.colorMsg(sender, "\nTx for " + CRAFT_AMOUNT + plugin.getTokenDenomName() + "->" + TO.subSequence(0, 16) + "...");
         IntegrationAPI.getInstance().sendTxIDClickable(sender, txInfo.getTxID().toString());
         IntegrationAPI.getInstance().sendWebappForSigning(sender, FROM);
     }

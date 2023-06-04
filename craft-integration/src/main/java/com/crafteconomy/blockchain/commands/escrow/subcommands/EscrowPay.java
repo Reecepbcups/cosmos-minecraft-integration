@@ -41,8 +41,8 @@ public class EscrowPay implements SubCommand {
             return;
         } 
 
-        Util.colorMsg(receiver, "&a" + player.getName() + " paid you " + craft_cost + "craft.");
-        Util.colorMsg(sender, "&a[!] Success! Paid : '" + args[1] + "'' " + craft_cost + "craft.");        
+        Util.colorMsg(receiver, "&a" + player.getName() + " paid you " + craft_cost + api.getTokenDenom() + ".");
+        Util.colorMsg(sender, "&a[!] Success! Paid : '" + args[1] + "'' " + craft_cost + api.getTokenDenom() + ".");        
         return;
     }
 }

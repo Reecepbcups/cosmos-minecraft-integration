@@ -91,7 +91,7 @@ public class EscrowManager {
         tx.setFromUUID(uuid);        
         tx.setToWalletAsEscrowRestAPIAccount(); // pays the escrow account (cosmjs in the API)
         tx.setUCraftAmount(ucraft_amount);
-        tx.setDescription("ESCROWING " + ucraft_amount / 1_000_000 + "craft (" + ucraft_amount + "ucraft) FOR "
+        tx.setDescription("ESCROWING " + ucraft_amount / 1_000_000 + "craft (" + ucraft_amount + api.getTokenDenom() + ") FOR "
                 + uuid.toString());
         tx.setFunction(depositEscrowLogic(uuid, ucraft_amount));
 
@@ -148,7 +148,7 @@ public class EscrowManager {
 
                 String messages = "";
                 if (status_type == FaucetTypes.SUCCESS) {                
-                    String amt = (mostTheyCanRedeemUCraft/1_000_000) + "craft";
+                    String amt = (mostTheyCanRedeemUCraft/1_000_000) + "  " + api.getTokenName();
                     messages = "&aYou have redeemed &f" + amt + "&a from your escrow account -> wallet.\n";
                     messages += "&f&oYour new escrow balance is: &f&n" + getCraftBalance(uuid);
                 } else {

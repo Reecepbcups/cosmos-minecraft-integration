@@ -21,9 +21,11 @@ public class WalletMultipleTxTesting implements SubCommand {
 
     // [/wallet genfaketxstest]
 
-    RedisManager redis = CraftBlockchainPlugin.getInstance().getRedis();
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
 
-    String webapp = CraftBlockchainPlugin.getInstance().getWebappLink();
+    RedisManager redis = plugin.getRedis();
+
+    String webapp = plugin.getWebappLink();
 
     int RedisMinuteTTL = CraftBlockchainPlugin.getRedisMinuteTTL();
 
@@ -57,7 +59,7 @@ public class WalletMultipleTxTesting implements SubCommand {
             // get a random number between 5billion  and 20 billion
             long randomNum = (long) (Math.random() * 15000000000L) + 5000000000L;
             TxInfo.setUCraftAmount(randomNum);
-            TxInfo.setDescription("" + randomNum + " ucraft");
+            TxInfo.setDescription("" + randomNum + " " + plugin.getTokenDenom());
             TxInfo.submit();  
         }
 

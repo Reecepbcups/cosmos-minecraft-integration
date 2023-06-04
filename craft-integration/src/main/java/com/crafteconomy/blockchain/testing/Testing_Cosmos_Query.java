@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import com.crafteconomy.blockchain.CraftBlockchainPlugin;
 
+// TODO: old remove.
 
 public class Testing_Cosmos_Query {
     

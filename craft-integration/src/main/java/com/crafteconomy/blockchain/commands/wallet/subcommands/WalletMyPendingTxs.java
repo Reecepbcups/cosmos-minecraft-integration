@@ -26,7 +26,8 @@ public class WalletMyPendingTxs implements SubCommand {
     // [/wallet mypending [wallet]
     // ^^ what the web app will see
 
-    RedisManager redis = CraftBlockchainPlugin.getInstance().getRedis();
+    CraftBlockchainPlugin plugin = CraftBlockchainPlugin.getInstance();
+    RedisManager redis = plugin.getRedis();
 
     @Override
     public void onCommand(CommandSender sender, String[] args) {
@@ -78,7 +79,7 @@ public class WalletMyPendingTxs implements SubCommand {
 
                         IntegrationAPI.getInstance().sendTxIDClickable(sender, key.replace(walletFormat, ""), "&7- &f%value%");
                         Util.colorMsg(sender, "&7&o   " + txinfo.getDescription());
-                        Util.colorMsg(sender, "&7&o   Cost: " + txinfo.getCraftAmount() + "craft (" + txinfo.getUCraftAmount() + "ucraft)\n");
+                        Util.colorMsg(sender, "&7&o   Cost: " + txinfo.getCraftAmount() + plugin.getTokenDenomName() +" (" + txinfo.getUCraftAmount() + plugin.getTokenDenom() + ")\n");
                     }
                 }
 

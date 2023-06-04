@@ -1,20 +1,23 @@
 # http://api.crafteconomy.io/v1/dao/escrow_account_info
-REST_API_WALLET_ADDRESS: craft14svh76rr38wkj9d3g5qmsxyjm7dhxk34v57ygy
+REST_API_WALLET_ADDRESS: juno1efd63aw40lxf3n4mhf7dzhjkr453axurv2zdzk
 # DAO Mutlisig account
-DAO_TAX_WALLET_ADDRESS: craft1n3a53mz55yfsa2t4wvdx3jycjkarpgkf07zwk7
+# Wallet #2 in test_node.sh
+DAO_TAX_WALLET_ADDRESS: juno1hj5fveer5cjtn4wd6wstzugjfdxzl0xps73ftl
 
-API_MAKE_PAYMENT_ENDPOINT: http://api.crafteconomy.io/v1/dao/make_payment
-# API_MAKE_PAYMENT_ENDPOINT: http://localhost:4000/v1/dao/make_payment
+# API_MAKE_PAYMENT_ENDPOINT: http://api.crafteconomy.io/v1/dao/make_payment
+API_MAKE_PAYMENT_ENDPOINT: http://localhost:4000/v1/dao/make_payment
 REDIS_KEY_EXPIRE_TIME: 0
-TX_QUERY_ENDPOINT: https://craft-rest.crafteconomy.io/cosmos/tx/v1beta1/txs/{TENDERMINT_HASH}
+TX_QUERY_ENDPOINT: https://api.juno.strange.love/cosmos/tx/v1beta1/txs/{TENDERMINT_HASH}
 TAX_RATE: 0.05
 DEV_MODE: false
 DEBUGGING_MSGS: true
-API_ENDPOINT: https://craft-rest.crafteconomy.io/
+API_ENDPOINT: https://api.juno.strange.love/
 SIGNING_WEBAPP_LINK: http://15.204.162.18:8081/
 DAO_ESCROW_ENDPOINT_SECRET: 'some.secret.here'
 MongoDB:
-  uri: mongodb://user:PASSWORD@IP:27017/?authSource=admin
+  # uri: mongodb://user:PASSWORD@IP:27017/?authSource=admin
+  uri: mongodb://localhost:27017
   database: crafteconomy
 Redis:
-  uri: redis://:password@IP:6379
+  # uri: redis://:password@IP:6379
+  uri: redis://localhost:6379

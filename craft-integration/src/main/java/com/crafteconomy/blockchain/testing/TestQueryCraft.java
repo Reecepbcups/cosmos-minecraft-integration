@@ -15,37 +15,34 @@ import com.crafteconomy.blockchain.CraftBlockchainPlugin;
 
 public class TestQueryCraft {
 
-    private static final String API_ENDPOINT = "https://craft-rest.crafteconomy.io/";
+    private static final String denom = "ujuno";
+    
+    private static final String API_ENDPOINT = "https://api.juno.strange.love/";
     private static final String BALANCES_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/balances/%address%/by_denom?denom=%denomination%";
     private static final String SUPPLY_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/supply/by_denom?denom=%denomination%";    
 
     public static void main(String[] args) {
-        String craft_address = "craft10r39fueph9fq7a6lgswu4zdsg8t3gxlqd6lnf0";
+        String craft_address = "juno10r39fueph9fq7a6lgswu4zdsg8t3gxlq670lt0";
 
-        queryCraftTokenPrice().thenAccept(price -> {
-            CraftBlockchainPlugin.log("Craft USD Price: " + price);
-        });
+        // queryCraftTokenPrice().thenAccept(price -> {
+        //     CraftBlockchainPlugin.log("Craft USD Price: " + price);
+        // });
 
         getUCraftBalance(craft_address).thenAcceptAsync(balance -> {
             // CraftBlockchainPlugin.log("Craft Balance: " + balance);    
             System.out.println("Current thread: " + Thread.currentThread().getName());                    
-            System.out.println("ucraft Balance: " + balance);
+            System.out.println("utoken Balance: " + balance);
         });
 
         getCraftBalance(craft_address).thenAcceptAsync(balance -> {        
             // CraftBlockchainPlugin.log("Craft Balance: " + balance);
-            System.out.println("craft Balance: " + balance);
+            System.out.println("token Balance: " + balance);
         });
         
         // System.out.println(suply_url);
-        getSupply("ucraft").thenAcceptAsync(amount -> {
+        getSupply(denom).thenAcceptAsync(amount -> {
             System.out.println("Current thread: " + Thread.currentThread().getName());                    
-            System.out.println("ucraft Supply: " + amount);
-        });
-
-        getSupply("uexp").thenAcceptAsync(amount -> {
-            System.out.println("Current thread: " + Thread.currentThread().getName());                    
-            System.out.println("uexp Supply: " + amount);
+            System.out.println(denom + " Supply: " + amount);
         });
 
     }

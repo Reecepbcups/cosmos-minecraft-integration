@@ -31,7 +31,7 @@ public class Balance implements CommandExecutor {
         
         api.getCraftBalance(player.getUniqueId()).thenAcceptAsync((bal) -> {
             if(bal >= 0) {
-                Util.colorMsg(player, "Your balance is: " + bal + "craft");
+                Util.colorMsg(player, "Your balance is: " + bal + " " + api.getTokenName());
             } else {
                 Util.colorMsg(player, "An error occured while fetching your balance");
                 // ErrorTypes.values() && ErrorTypes.NETWORK_ERROR.code

@@ -46,14 +46,14 @@ public class EscrowCMD implements CommandExecutor, TabCompleter {
 		}	        
 
         // if(args.length >= 1) {
-        //     String subCommand = args[0].toLowerCase(); // walelt <SUBCOMMAND>
+        //     String subCommand = args[0].toLowerCase(); // wallet <SUBCOMMAND>
 
         //     if(subCommand.startsWith("bal")) {                
         //         if(args.length == 2) { return null; }
         //     }
 
         //     if(subCommand.startsWith("set")) {
-        //         if(args.length == 2) { return Arrays.asList("<craft-wallet-address>"); }
+        //         if(args.length == 2) { return Arrays.asList("<wallet-address>"); }
         //     }
 
         //     if(subCommand.startsWith("pay") || subCommand.startsWith("send")) {

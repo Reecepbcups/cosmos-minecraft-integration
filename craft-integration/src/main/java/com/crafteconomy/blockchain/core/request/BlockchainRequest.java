@@ -85,11 +85,11 @@ public class BlockchainRequest {
 
     }
 
-    public static CompletableFuture<Long> getUCraftBalance(String craft_address) { // 1_000_000ucraft = 1craft
-        return getBalance(craft_address, "ucraft");
+    public static CompletableFuture<Long> getUCraftBalance(String craft_address) { // 1_000_000utoken = 1token
+        return getBalance(craft_address, blockchainPlugin.getTokenDenom());
     }
 
-    public static CompletableFuture<Float> getCraftBalance(String craft_address) { // 1 craft        
+    public static CompletableFuture<Float> getCraftBalance(String craft_address) { // 1 token        
         return getUCraftBalance(craft_address).thenApply(ucraft -> (float) (ucraft / 1_000_000));
     }
 
@@ -113,7 +113,7 @@ public class BlockchainRequest {
     }
 
     public static CompletableFuture<Long> getTotalSupply() {
-        return getTotalSupply("ucraft");
+        return getTotalSupply(blockchainPlugin.getTokenDenom());
     }
 
     // -= GIVING TOKENS =-
@@ -252,7 +252,7 @@ public class BlockchainRequest {
             if(p != null) {
                 Util.colorMsg(p, "&6[!] Error: Payment failed. Saved to database & will be tried again soon.");
                 Util.colorMsg(p, "&e&oReason: " + failure_reason);
-                Util.colorMsg(p, "&e&oAmount: " + ucraft_amount/1_000_000 + " craft.");
+                Util.colorMsg(p, "&e&oAmount: " + ucraft_amount/1_000_000 + blockchainPlugin.getTokenDenomName() + ".");
                 Util.colorMsg(p, "&6NOTE: No action is required on your part.");
             }
         }
@@ -278,9 +278,9 @@ public class BlockchainRequest {
     }
     
 
-    public static CompletableFuture<FaucetTypes> depositUCraftToAddress(String craft_address, String description, long ucraft_amount) {   
+    public static CompletableFuture<FaucetTypes> depositUCraftToAddress(String craft_address, String description, long utoken_amount) {   
         // curl --data '{"secret": "7821719493", "wallet": "craft10r39fueph9fq7a6lgswu4zdsg8t3gxlqd6lnf0", "amount": 50000}' -X POST -H "Content-Type: application/json"  http://api.crafteconomy.io/v1/dao/make_payment
-        return CompletableFuture.supplyAsync(() -> makePostRequest(craft_address, description, ucraft_amount)).completeOnTimeout(FaucetTypes.ENDPOINT_TIMEOUT, 45, TimeUnit.SECONDS);
+        return CompletableFuture.supplyAsync(() -> makePostRequest(craft_address, description, utoken_amount)).completeOnTimeout(FaucetTypes.ENDPOINT_TIMEOUT, 45, TimeUnit.SECONDS);
 
     }
     public static CompletableFuture<FaucetTypes> depositCraftToAddress(String craft_address, String description, float craft) {           
@@ -314,7 +314,7 @@ public class BlockchainRequest {
         
         org.json.JSONObject jsonObject;
         try {
-            // we submit the uCraft amount -> the redis for the webapp to sign it directly
+            // we submit the ucraft amount -> the redis for the webapp to sign it directly
             String transactionJson = generateTxJSON(transaction);
             jsonObject = new org.json.JSONObject(transactionJson);            
        }catch (JSONException err) {
@@ -354,7 +354,8 @@ public class BlockchainRequest {
         // EX: {"amount":"2","description":"Purchase Business License for 2","to_address":"osmo10r39fueph9fq7a6lgswu4zdsg8t3gxlqyhl56p","tax":{"amount":0.1,"address":"osmo10r39fueph9fq7a6lgswu4zdsg8t3gxlqyhl56p"},"denom":"uosmo","from_address":"osmo10r39fueph9fq7a6lgswu4zdsg8t3gxlqyhl56p"}
               
         // Tax is another message done via webapp to pay a fee to the DAO. So the total transaction cost = amount + tax.amount
-        String json = "{\"from_address\": "+FROM+",\"to_address\": "+TO+",\"description\": "+DESCRIPTION+",\"tx_type\": "+txType.toString()+",\"server_name\": "+CraftBlockchainPlugin.SERVER_NAME+",\"timestamp\": "+now+",\"amount\": \""+UCRAFT_AMOUNT+"\",\"denom\": \"ucraft\",\"tax\": { \"amount\": "+ucraft_tax_amount+", \"address\": "+DAO_TAX_WALLET+"}}";
+        // String json = "{\"from_address\": "+FROM+",\"to_address\": "+TO+",\"description\": "+DESCRIPTION+",\"tx_type\": "+txType.toString()+",\"server_name\": "+CraftBlockchainPlugin.SERVER_NAME+",\"timestamp\": "+now+",\"amount\": \""+UCRAFT_AMOUNT+"\",\"denom\": \"ucraft\",\"tax\": { \"amount\": "+ucraft_tax_amount+", \"address\": "+DAO_TAX_WALLET+"}}";
+        String json = "{\"from_address\": "+FROM+",\"to_address\": "+TO+",\"description\": "+DESCRIPTION+",\"tx_type\": "+txType.toString()+",\"server_name\": "+CraftBlockchainPlugin.SERVER_NAME+",\"timestamp\": "+now+",\"amount\": \""+UCRAFT_AMOUNT+"\",\"denom\": "+blockchainPlugin.getTokenDenom()+",\"tax\": { \"amount\": "+ucraft_tax_amount+", \"address\": "+DAO_TAX_WALLET+"}}";
 
         // Escrow, Authentication types = No tax.
         switch (txType) {
@@ -362,7 +363,7 @@ public class BlockchainRequest {
             case ESCROW_DEPOSIT:
             case ESCROW_WITHDRAW:
             case LIQUIDITY_POOL: // swaps
-                json = "{\"from_address\": "+FROM+",\"to_address\": "+TO+",\"description\": "+DESCRIPTION+",\"tx_type\": "+txType.toString()+",\"server_name\": "+CraftBlockchainPlugin.SERVER_NAME+",\"timestamp\": "+now+",\"amount\": \""+UCRAFT_AMOUNT+"\",\"denom\": \"ucraft\"}";
+                json = "{\"from_address\": "+FROM+",\"to_address\": "+TO+",\"description\": "+DESCRIPTION+",\"tx_type\": "+txType.toString()+",\"server_name\": "+CraftBlockchainPlugin.SERVER_NAME+",\"timestamp\": "+now+",\"amount\": \""+UCRAFT_AMOUNT+"\",\"denom\": "+blockchainPlugin.getTokenDenom()+"";
                 break;
             default:
                 break;
