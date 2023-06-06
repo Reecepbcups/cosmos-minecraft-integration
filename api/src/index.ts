@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 
 // Start REST api
 app.listen(API_PORT, async () => {
-    console.log(`Started Craft Economy REST API on port ${API_PORT}`);
+    console.log(`Started Integration REST API on port ${API_PORT}`);
 
     const client = await getCosmWasmClient();
     if(client) {

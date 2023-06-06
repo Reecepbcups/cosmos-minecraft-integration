@@ -20,7 +20,7 @@ export const sendDiscordWebhook = async (title: string, description: string, fie
     }
 
     webhookClient.send({
-        username: 'Craft Economy API Notifications',
+        username: 'MC-COSMOS API Notifications',
         avatarURL: 'https://cdn.discordapp.com/icons/871646581777125417/a_8b2db9405010bee2b7cb831e9d53381c.webp?size=128',
         embeds: [embed],
     });

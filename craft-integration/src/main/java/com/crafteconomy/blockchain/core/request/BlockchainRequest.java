@@ -55,7 +55,7 @@ public class BlockchainRequest {
 
     // Found via https://v1.cosmos.network/rpc/v0.41.4
     private static final String BALANCES_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/balances/%address%/by_denom?denom=%denomination%";
-    private static final String SUPPLY_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/supply/by_denom?denom=%denomination%";    
+    // private static final String SUPPLY_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/supply/by_denom?denom=%denomination%";    
 
     // -= BALANCES =-
     public static CompletableFuture<Long> getBalance(String craft_address, String denomination) {

@@ -46,7 +46,7 @@ public class CraftBlockchainPlugin extends JavaPlugin {
 
     // TODO: config.yml
     private static final String WALLET_PREFIX = "juno";    
-    private static final String TOKEN_DENOM = "ujuno";    
+    private static final String TOKEN_DENOM = "ujunox";    
     private static final String TOKEN_DENOM_NAME = "Juno";    
 
 
@@ -60,8 +60,10 @@ public class CraftBlockchainPlugin extends JavaPlugin {
 
     private Double TAX_RATE;
 
+    // TODO: Change this to be in the API itself.
     private String DAO_SERVER_WALLET = null;
     private String REST_API_WALLET_ADDRESS = null;
+
     private String INTERNAL_API = null;
     private String API_MAKE_PAYMENT_ENDPOINT = INTERNAL_API + "/v1/dao/make_payment";
 

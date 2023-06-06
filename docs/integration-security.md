@@ -96,7 +96,7 @@ User A runs feature in-game to buy 10 bread for 1CRAFT.
 User A signs this in the WebApp (This is a valid sign just as any player would do).
 - The user then knows this returned a Tx hash which = "1A2B3CD4" from CosmJS.
 
-The user now generates this same transaction in-game: "10 bread for 1 craft".
+The user now generates this same transaction in-game: "10 bread for 1 token_denom".
 With them now controlling the API, they can send through a POST for this new txUUID & the SAME tendermint txhash as their first transaction, since the AMOUNT, TO, FROM, and DESCRIPTION have not changed.
 ```
 

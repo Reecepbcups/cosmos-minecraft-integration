@@ -9,41 +9,18 @@ import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { coin, coins, Coin } from "@cosmjs/amino";
 import { fromBech32, toBech32, toHex } from "@cosmjs/encoding";
 
+const WALLET_PREFIX = "juno";
+const DENOM = "ujunox";
+const DENOM_NAME = "junox";
+const GAS_PRICES = 0.0025
+const GAS = 200_000
+
 // Env
 import { config } from 'dotenv';
 config();
 
 // create boolean to disable caching
 const allowCache = false;
-
-const prefixes = {
-    "cosmos": {
-        rpc: "https://rpc.cosmoshub.strange.love",
-        denom: "uatom",
-        coingecko: "cosmos",
-    },
-    "osmo": {
-        rpc: "https://rpc-osmosis.whispernode.com",
-        denom: "uosmo",
-        coingecko: "osmosis",
-    },
-    "juno": {
-        rpc: "https://rpc.juno.chaintools.tech",
-        denom: "ujuno",
-        coingecko: "juno-network",
-    },
-    "akash": {
-        rpc: "https://rpc.akash.forbole.com:443",
-        denom: "uakt",
-        coingecko: "akash-network",
-    },
-    // lol dig
-    "dig": {
-        rpc: "https://rpc-1-dig.notional.ventures",
-        denom: "udig",
-        coingecko: "dig-chain",
-    },
-};
 
 // https://github.com/cosmos/cosmjs/tree/main/packages/cli/examples
 
@@ -76,7 +53,7 @@ export const getEscrowBalances = async () => {
 
     let data = {
         balances: 0,
-        denom: "craft",
+        denom: DENOM_NAME,
         unique_accounts: 0,
     };
     if(escrow_balances_data && escrow_balances_data.length >= 1) {
@@ -85,7 +62,7 @@ export const getEscrowBalances = async () => {
 
         return {
             balances: total,
-            denom: "ucraft",
+            denom: DENOM,
             unique_accounts: unique_records,
         };        
     }
@@ -111,7 +88,7 @@ export const getServersEscrowAccountInfo = async () => {
         return data_format
     }
 
-    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(walletMnumonic, { prefix: "craft" });
+    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(walletMnumonic, { prefix: WALLET_PREFIX });
     const [account] = await wallet.getAccounts();
     const balance = await getCraftBalance(account.address);
 
@@ -127,182 +104,19 @@ export const getServersEscrowAccountInfo = async () => {
     return data_format;
 }
 
-// TODO: Why?
-/**
- * @param coin String
- * @returns 
- */
-export const getTotalSupply = async (coin: string) => {
-    const REDIS_KEY = `cache:token_total_supply`;
-    const TTL = 30 * 5; // 5 min
-    const REDIS_HSET_KEY = `${coin}` // ucraft, uexp
-    if (allowCache) {
-        let cached_total_supply = await redisClient?.hGet(REDIS_KEY, REDIS_HSET_KEY);
-        if (cached_total_supply) {
-            console.log(`TotalSupply token: ${coin} found in redis -> ${REDIS_KEY}`);
-            return JSON.parse(cached_total_supply);
-        }
-    }
-
-    const value = await axios.get(`${process.env.CRAFTD_REST}/cosmos/bank/v1beta1/supply/by_denom?denom=${coin}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-    }).then(res => {
-        // console.log("amount", res.data.amount.amount);
-        return res.data.amount.amount; // { denom: 'uexp', amount: '1000000000000000010000000' }
-    }).catch(err => {
-        console.log(err);
-        return -1;
-    });
-
-    if(allowCache) {
-        await redisClient?.hSet(REDIS_KEY, REDIS_HSET_KEY, JSON.stringify(value));
-        await redisClient?.expire(REDIS_KEY, TTL);
-    }
-
-    return value;
-}
-
 // escrow account
 export const getCraftBalance = async (wallet_addr) => {
-    // get craft escrow account
-    let balance = coin("0", "ucraft");
+    // get escrow account
+    let balance = coin("0", DENOM);
     try {
         const client = await SigningStargateClient.connectWithSigner(`${process.env.CRAFTD_NODE}`, wallet_addr);
         // const balance = await client.getAllBalances(account.address)
-        balance = await client.getBalance(wallet_addr, "ucraft")        
+        balance = await client.getBalance(wallet_addr, DENOM)        
     } catch (error) {
         console.log("getCraftBalance", error);
     }
 
     return balance;
-}
-
-
-export const getAssetHoldingAmount = async (address, prefix, rpc_url, denom) => {
-    console.log("getting assets for addr:", address, " via rpc:", rpc_url);
-
-    const REDIS_KEY = `cache:dao_wallet_holding_amt-${address}`;    
-    if (allowCache) {
-        let get_wallet_value = await redisClient?.get(REDIS_KEY);
-        if (get_wallet_value) {
-            // console.log(`Asset: ${denom} holdings ${get_wallet_value} found in redis cache -> ${REDIS_KEY}`);
-            return JSON.parse(get_wallet_value);
-        }
-    }
-
-    let ASSETS = { ubalance: "", amount: "" };
-
-    // non cache, get balances & staked amount * price stuff
-    const client = await StargateClient.connect(`${rpc_url}`).catch(err => {
-        sendDiscordWebhook(`DAO ERROR: ${rpc_url} down`, "The RPC is down for getting asset prices, you should really fix that", {}, '#cf1b1b');
-        console.log(err);
-        return undefined;
-    });
-
-    if (!client) { // RPC is bad or it just did not connect properly
-        ASSETS.ubalance = "-1";
-        ASSETS.amount = "-1";
-        return ASSETS;
-    }
-
-    const bal: Coin = await client.getBalance(address, denom).then(res => {
-        console.log("balance:", res);
-        return coin(`${res.amount}`, res.denom);
-    }).catch(err => {
-        console.log(err);
-        return coin(0, denom);
-    });
-
-    let staked_amount = await client.getBalanceStaked(address).then((res) => {
-        let amt = res?.amount;
-        if(amt){
-            return BigInt(amt) / BigInt(1_000_000);
-        }
-        return -1;        
-    }).catch((err) => {
-        console.log(err);
-        return -1;
-    });
-    // console.log("staked_amount:", staked_amount);
-    if (!staked_amount) { staked_amount = 0; }
-
-    // console.log(ASSETS.amount, ASSETS.ubalance, staked_amount);
-
-    ASSETS.ubalance = bal.amount;
-    ASSETS.amount = ((BigInt(bal.amount)/BigInt(1_000_000)) + BigInt(staked_amount)).toString(); // amount in normal human readable format
-    // console.log("ASSETS.amount (should include stake): ", ASSETS.amount);
-
-    // console.log(ASSETS.amount, ASSETS.ubalance, staked_amount);
-
-    // save to redis
-    if(allowCache) {
-        await redisClient?.set(REDIS_KEY, JSON.stringify(ASSETS));
-        const TTL = Math.floor(Math.random() * (15 - 10 + 1)) + 10;  // 10 to 15 minutes  
-        await redisClient?.expire(REDIS_KEY, TTL * 60);
-    }
-
-    return ASSETS
-}
-
-export const getAssets = async (addresses?) => {
-    // since wallets take so long to query, we save the asset with a random TTL in redis.
-    // This way we only have to query 1 or 2 wallets before returning the whole requests, thus increasing speed for little cost.
-    let ubalances = {}; // "udenom": amount (held)
-    let TOTAL_ASSETS = {}; // "denom": amount
-
-    if (!addresses) {
-        addresses = await getWallets();
-    }
-
-    let promises: any = [];
-
-    for (const addr of addresses) {
-        const prefix = getWalletAPrefix(addr);
-        const rpc_url = prefixes[prefix].rpc;
-        const denom = prefixes[prefix].denom;
-
-        // gets cached amount if it exists
-        // const t = await getAssetHoldingAmount(addr, prefix, rpc_url, denom);
-        promises.push({
-            // addr: addr,
-            prefix: prefix,
-            // rpc_url: rpc_url,
-            denom: denom,
-            t: getAssetHoldingAmount(addr, prefix, rpc_url, denom)
-        });
-    }
-
-    const re = await Promise.all(promises.map(p => p.t.then(t => ({ ...p, t }))));
-
-    for (const r of re) {
-        // const addr = r.addr;
-        const prefix = r.prefix;
-        // const rpc_url = r.rpc_url;
-        const denom = r.denom;
-        const t = r.t;
-
-        if (ubalances[denom] === undefined) {
-            ubalances[denom] = BigInt(0);
-            TOTAL_ASSETS[prefix] = BigInt(0);
-        }
-        ubalances[denom] += BigInt(t.ubalance);
-        TOTAL_ASSETS[prefix] += BigInt(t.amount); // since we save to prefix for coingecko, we need the whole denom not micro udenom
-    }
-
-
-    // convert every ubalances & TOTAL_ASSETS TO A STRING
-    for (const denom in ubalances) {
-        ubalances[denom] = ubalances[denom].toString();
-    }
-    for (const denom in TOTAL_ASSETS) {
-        TOTAL_ASSETS[denom] = TOTAL_ASSETS[denom].toString();
-    }    
-
-    // total includes staked amount
-    return { balance_only: ubalances, total: TOTAL_ASSETS }
 }
 
 export const getWallets = async () => {
@@ -349,19 +163,20 @@ export const makePayment = async (secret: string, recipient_wallet: string, ucra
     let account;
     try {
         // TODO: pre generate these so we can just grab the client & sign? 
-        const server_wallet = await DirectSecp256k1HdWallet.fromMnemonic(`${process.env.CRAFT_DAO_ESCROW_WALLET_MNUMONIC}`, { prefix: "craft" });
+        const server_wallet = await DirectSecp256k1HdWallet.fromMnemonic(`${process.env.CRAFT_DAO_ESCROW_WALLET_MNUMONIC}`, { prefix: WALLET_PREFIX });
         client = await SigningStargateClient.connectWithSigner(`${process.env.CRAFTD_NODE}`, server_wallet);
         account = await server_wallet.getAccounts();
     } catch (error) {
         console.log(error);
         return;
-    }
+    }    
 
     const time = new Date().toISOString();
-    const coins_amt = coins(ucraft_amount, "ucraft");
-    const gasPrice = GasPrice.fromString("0.025ucraft");
-    const fee = calculateFee(200_000, gasPrice);
-    let result;
+    const coins_amt = coins(ucraft_amount, DENOM);
+    const gasPrice = GasPrice.fromString(GAS_PRICES.toString() + DENOM);
+    const fee = calculateFee(GAS, gasPrice);
+    let result;    
+
     try {
         console.log("DEBUG: " + account[0].address + " sending " + coins_amt + " to " + recipient_wallet + " with description " + description + " fee: " + fee);
         result = await client.sendTokens(
@@ -371,11 +186,13 @@ export const makePayment = async (secret: string, recipient_wallet: string, ucra
             fee,
             "Payment from SERVER @ " + time + " " + description
         );
-        assertIsDeliverTxSuccess(result);
+        
+        assertIsDeliverTxSuccess(result);        
+
         // console.log("Successfully broadcasted:", result.code, result.height, result.transactionHash, (result.rawLog).toString());
         console.log("Successfully broadcasted:", result.code, result.height, result.transactionHash);
-    } catch (err) {
-        console.log("Error:", err.message);
+        // return { "success": { "wallet": recipient_wallet, "ucraft_amount": ucraft_amount, "craft_amount": "999", "serverCraftBalLeft": "999", "transactionHash": result.transactionHash, "height": result.height } };
+    } catch (err) {        
         // {"error":"{\"code\":-32603,\"message\":\"Internal error\",\"data\":\"tx already exists in cache\"}"}
         // TODO: save to DB to retry later
 
@@ -396,15 +213,15 @@ export const makePayment = async (secret: string, recipient_wallet: string, ucra
     let serverBalanceLeft = await getServersEscrowAccountInfo();
     let balanceLeftString = "";
     if (serverBalanceLeft) {
-        balanceLeftString = (Number(serverBalanceLeft.balance) / 1_000_000).toString() + "craft"
+        balanceLeftString = (Number(serverBalanceLeft.balance) / 1_000_000).toString() + DENOM;
     }
 
     // bigint ucraft_amount
     let asCraft = BigInt(ucraft_amount) / BigInt(1_000_000);
 
-    let desc = ucraft_amount.toString() + "ucraft";
+    let desc = ucraft_amount.toString() + DENOM;
     if(asCraft >= 0.05) {
-        desc += " | (" + asCraft.toString() + " craft)";
+        desc += " | (" + asCraft.toString() + " " + DENOM + " )";
     }
     await sendDiscordWebhook(
         'SERVER PAYMENT | ' + time,
@@ -415,8 +232,7 @@ export const makePayment = async (secret: string, recipient_wallet: string, ucra
             "Server bal Left: ": balanceLeftString
         },
         '#0099ff'
-    );
-    // await sendDiscordWebhook(`SERVER PAYMENT | ${time}`, `${ucraft_amount.toString()}ucraft->${recipient_wallet}\n(${asCraft.toString()}craft)\nBalance Left: ${balanceLeftString}`, {}, '#cf1b1b');
+    );    
 
     return { "success": { "wallet": recipient_wallet, "ucraft_amount": ucraft_amount, "craft_amount": asCraft.toString(), "serverCraftBalLeft": balanceLeftString, "transactionHash": result.transactionHash, "height": result.height } };
 };

@@ -15,7 +15,7 @@ import com.crafteconomy.blockchain.CraftBlockchainPlugin;
 
 public class TestQueryCraft {
 
-    private static final String denom = "ujuno";
+    private static final String denom = "ujunox";
     
     private static final String API_ENDPOINT = "https://api.juno.strange.love/";
     private static final String BALANCES_ENDPOINT = API_ENDPOINT + "cosmos/bank/v1beta1/balances/%address%/by_denom?denom=%denomination%";

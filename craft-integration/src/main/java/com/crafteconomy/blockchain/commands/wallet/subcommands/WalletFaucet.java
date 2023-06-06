@@ -66,7 +66,7 @@ public class WalletFaucet implements SubCommand {
         // used only for outputs
         String reducedWallet = wallet.substring(0, 20) + "...";
 
-        Util.colorMsg(sender, "&f&o[!] Faucet request sent for " + reducedWallet);   
+        Util.colorMsg(sender, "&f&o[!] Faucet request sent for " + reducedWallet + ". Sending " + craftAmount + plugin.getTokenDenomName() + " to their wallet.");   
         Util.colorMsg(sender, "&f&o[!] This may take up to ~45 seconds to process.");
                 
         final String finalWallet = wallet;
