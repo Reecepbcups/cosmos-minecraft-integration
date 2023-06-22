@@ -1,4 +1,4 @@
-# Juno PvP + Minecraft integration
+#Cosmos + Minecraft integration
 
 This is a fork of my 100% original work at Craft Economy. You can find the original source here
 
