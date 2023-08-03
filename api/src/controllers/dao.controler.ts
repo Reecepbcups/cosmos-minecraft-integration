@@ -1,15 +1,40 @@
 // Express
 import { Request, Response } from 'express';
-import { makePayment, getServersEscrowAccountInfo } from '../services/dao.service';
+import { getServersEscrowAccountInfo, addBundlePayment, signAndBroadcastBundlePayment, getBundledMessages } from '../services/dao.service';
 
-export const makePaymentToPlayer = async (req: Request, res: Response) => {
-    const {secret, wallet, ucraft_amount, description} = req.body;
+// deprecated for bundled payment
+// export const makePaymentToPlayer = async (req: Request, res: Response) => {
+//     const {secret, wallet, ucraft_amount, description} = req.body;
 
-    // console.log("makePayment:", secret, wallet, ucraft_amount, description);
+//     // console.log("makePayment:", secret, wallet, ucraft_amount, description);
 
-    const response = await makePayment(secret, wallet, ucraft_amount, description);
+//     const response = await makePayment(secret, wallet, ucraft_amount, description);
+//     if (response) return res.status(200).json(response);
+//     else return res.status(404).json({ message: 'No Real Estate NFTs found for this wallet' });
+// };
+
+export const appendBundlePayment = async (req: Request, res: Response) => {
+    const {secret, wallet, ucraft_amount} = req.body;
+    console.log("addBundlePayment:", secret, wallet, ucraft_amount);
+
+    const response = await addBundlePayment(secret, wallet, ucraft_amount);
     if (response) return res.status(200).json(response);
     else return res.status(404).json({ message: 'No Real Estate NFTs found for this wallet' });
+};
+
+export const broadcastBundledPayment = async (req: Request, res: Response) => {
+    const {secret} = req.body;
+    console.log("broadcastBundledPayment:", secret);
+
+    const response = await signAndBroadcastBundlePayment(secret);
+    if (response) return res.status(200).json(response);
+    else return res.status(404).json({ message: 'No Real Estate NFTs found for this wallet' });
+};
+
+export const getPendingPayments = async (req: Request, res: Response) => {
+    const response = getBundledMessages();
+    if (response) return res.status(200).json(response);
+    else return res.status(404).json({ message: 'Pending payments error' });
 };
 
 
@@ -21,5 +46,8 @@ export const getServerEscrowWallet = async (req: Request, res: Response) => {
 
 export default {        
     getServerEscrowWallet,
-    makePaymentToPlayer
+    // makePaymentToPlayer,
+    appendBundlePayment,
+    broadcastBundledPayment,
+    getPendingPayments,
 };

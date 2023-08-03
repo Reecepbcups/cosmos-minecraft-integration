@@ -4,7 +4,7 @@ import { sendDiscordWebhook } from './discord.service';
 import axios from 'axios'; // TODO: use QueryClient bankExtension to query totalSupply
 
 // https://cosmos.github.io/cosmjs/
-import { StdFee, assertIsDeliverTxSuccess, calculateFee, GasPrice, SigningStargateClient, StargateClient, QueryClient } from "@cosmjs/stargate";
+import { StdFee, assertIsDeliverTxSuccess, calculateFee, GasPrice, SigningStargateClient, StargateClient, QueryClient, DeliverTxResponse } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { coin, coins, Coin } from "@cosmjs/amino";
 import { fromBech32, toBech32, toHex } from "@cosmjs/encoding";
@@ -135,6 +135,125 @@ const getWalletAPrefix = (address: string) => {
 }
 
 
+// an  array of objects which are of type Any
+import { EncodeObject } from "@cosmjs/proto-signing";
+let messages: EncodeObject[] = []
+
+const assetProperSecret = (secret: string): boolean => {
+    if (secret !== process.env.CRAFT_DAO_ESCROW_SECRET) {
+        console.log("Secret passed through function: " + secret)
+        return false;
+    }
+
+    return true
+}
+
+export const addBundlePayment = async (secret: string, recipient_wallet: string, utoken_amount: string) => {    
+    if(assetProperSecret(secret) === false) {
+        return {"error": "secret is incorrect"};
+    }
+    
+    const fromAcc = await getServersEscrowAccountInfo();    
+
+    const msg: EncodeObject = {
+        typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+        value: {
+            fromAddress: fromAcc.address,
+            toAddress: recipient_wallet,
+            amount: [
+                {
+                    denom: DENOM,
+                    amount: utoken_amount,
+                },
+            ],
+        },
+    }
+    messages.push(msg);
+
+    return { "success": { "wallet": recipient_wallet, "utoken_amount": utoken_amount } };
+}
+
+export const getBundledMessages = () => {
+    return messages;
+}
+
+// add a way to sign this and submit
+export const signAndBroadcastBundlePayment = async (secret: string) => {
+    if(assetProperSecret(secret) === false) {
+        return {"error": "secret is incorrect"};
+    }
+
+    let client: SigningStargateClient;
+    let account;
+    try {
+        // TODO: pre generate these so we can just grab the client & sign? 
+        const server_wallet = await DirectSecp256k1HdWallet.fromMnemonic(`${process.env.CRAFT_DAO_ESCROW_WALLET_MNUMONIC}`, { prefix: WALLET_PREFIX });
+        client = await SigningStargateClient.connectWithSigner(`${process.env.CRAFTD_NODE}`, server_wallet);
+        account = await server_wallet.getAccounts();
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+
+    // print account address
+    console.log(account[0].address);
+
+    let result: DeliverTxResponse;
+
+    const time = new Date().toISOString();
+    // const coins_amt = coins(ucraft_amount, DENOM);
+    const gasPrice = GasPrice.fromString(GAS_PRICES.toString() + DENOM);
+    const fee = calculateFee(GAS, gasPrice);
+   
+    const memo = "Payment from SERVER @ " + time + " with messages: " + messages.length;
+    console.log(memo)
+
+    try {
+        console.log("DEBUG: " + account[0].address + " sending " + messages + " fee: " + fee);        
+        result = await client.signAndBroadcast(account[0].address, messages, fee, memo);
+        
+        assertIsDeliverTxSuccess(result);        
+
+        // console.log("Successfully broadcasted:", result.code, result.height, result.transactionHash, (result.rawLog).toString());
+        console.log("Successfully broadcasted bulk Txs:", result.code, result.height, result.transactionHash);
+        // return { "success": { "wallet": recipient_wallet, "ucraft_amount": ucraft_amount, "craft_amount": "999", "serverCraftBalLeft": "999", "transactionHash": result.transactionHash, "height": result.height } };
+
+    } catch (err) {        
+        // {"error":"{\"code\":-32603,\"message\":\"Internal error\",\"data\":\"tx already exists in cache\"}"}
+        // TODO: save to DB to retry later
+
+        let code: string = "unknown"
+        let reason: string = err.message;
+        if (err.message.includes("Code: ")) {
+            code = err.message.split("Code: ");
+            code = code[1].split(";")[0];
+            reason = err.message.split("message index: ")[1]//.split("\"")[0];
+        } else {
+            console.log("Error:", err.message);
+        }
+
+        const hasEnoughFunds = !err.message.includes("insufficient funds");
+        return { "error": { "code": code, "reason": reason, "hasEnoughFunds": hasEnoughFunds } };
+    }
+
+    let allAccounts: string[] = [];
+    for (const msg of messages) {
+        allAccounts.push(msg.value.to_address);
+    }
+
+
+    const res = {"success": { "transactionHash": result.transactionHash, "height": result.height, "payments": messages.length, "accounts": allAccounts } };
+
+    // TODO: Push allAccounts to redis so we can subscribe to it in game and announce to players in the list as they get paid every X seconds.
+
+    // clear messages (Should this be here or ONLY if the Tx is success?)
+    messages = [];
+
+    // return an array here of all sends / interacts that are NOT smart contracts?
+    return res;
+}
+    
+
 // TODO: I should batch these every X blocks or something.
 /**
  * https://github.com/cosmos/cosmjs/blob/main/packages/cli/examples/local_faucet.ts
@@ -142,24 +261,18 @@ const getWalletAPrefix = (address: string) => {
  * This function will pay a player's account from their esgrow wallet in game.
  * 
  * curl --data '{"secret": "7821719493", "description": "test description", "wallet": "craft10r39fueph9fq7a6lgswu4zdsg8t3gxlqd6lnf0", "ucraft_amount": 500}' -X POST -H "Content-Type: application/json"  http://localhost:4000/v1/dao/make_payment
- */
+*/
+// deprecated in favor of bulk updates
 export const makePayment = async (secret: string, recipient_wallet: string, ucraft_amount: string, description: string) => {
     // confirm request amount not > DAO wallet balance. If so return error & dont process in game
     // TODO: Future: Bulk pay transactions?
 
-    // This should really never happen
-    // if (ucraft_amount > Number.MAX_SAFE_INTEGER) {
-    //     console.log("ucraftamount was > Number.MAX_SAFE_INTEGER, so set to", Number.MAX_SAFE_INTEGER);
-    //     ucraft_amount = Number.MAX_SAFE_INTEGER;
-    // }    
-
     // check if secret & if so, check if == process.env.CRAFT_DAO_ESCROW_SECRET
-    if (secret !== process.env.CRAFT_DAO_ESCROW_SECRET) {
-        console.log("Secret passed through function: " + secret)
-        return { "error": "secret is incorrect" };
+    if(assetProperSecret(secret) === false) {
+        return {"error": "secret is incorrect"};
     }
 
-    let client;
+    let client: SigningStargateClient;
     let account;
     try {
         // TODO: pre generate these so we can just grab the client & sign? 
