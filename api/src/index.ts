@@ -4,6 +4,8 @@ import express from 'express';
 import { config } from 'dotenv';
 // Mongo
 import { connectToMongo, connectToRedis } from './services/database.service';
+// Signing service
+import { signAndBroadcastBundlePayment, getBundledMessages } from './services/dao.service';
 // Cors
 import cors from 'cors';
 // Controllers
@@ -77,6 +79,23 @@ app.get('/', (req, res) => {
 // Start REST api
 app.listen(API_PORT, async () => {
     console.log(`Started Integration REST API on port ${API_PORT}`);
+
+    let intervalSeconds = 1000 * 6;
+
+    // starting auto signing API process
+    setInterval(async () => {
+        let msgLen = getBundledMessages().length;
+        // call signAndBroadcastBundlePayment
+        if(msgLen > 0) {
+            console.log("DEBUG: signAndBroadcastBundlePayment called with " + msgLen + " messages");
+            const response = await signAndBroadcastBundlePayment(process.env.CRAFT_DAO_ESCROW_SECRET || "");
+            if (response) {
+                console.log("SUCCESS RESP: signAndBroadcastBundlePayment response: ", response);
+            } else {
+                console.log("ERROR RESP: signAndBroadcastBundlePayment response: ", response);
+            }
+        }
+    }, intervalSeconds);
 
     const client = await getCosmWasmClient();
     if(client) {
