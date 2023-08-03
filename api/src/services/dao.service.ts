@@ -244,6 +244,8 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
 
     const res = {"success": { "transactionHash": result.transactionHash, "height": result.height, "payments": messages.length, "accounts": allAccounts } };
 
+    // TODO: Push allAccounts to redis so we can subscribe to it in game and announce to players in the list as they get paid every X seconds.
+
     // clear messages (Should this be here or ONLY if the Tx is success?)
     messages = [];
 
