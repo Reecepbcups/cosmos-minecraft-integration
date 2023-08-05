@@ -1,0 +1,56 @@
+# Intellij
+.idea/
+*.iml
+*.iws
+dependency-reduced-pom.xml
+settings.properties
+.git-versioned-pom.xml
+pom.xml.versionsBackup
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
+
+build.xml
+
+# Visual Studio
+.vscode/
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.dll
+*.lib
+*.sbr
+
+# Artifacts
+*.class
+
+# Other
+bin/
+dist/
+*.sh

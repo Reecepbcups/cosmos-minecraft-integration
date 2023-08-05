@@ -1,0 +1,13 @@
+name: craft-account-sync
+main: com.crafteconomy.accountsync.CraftAccountSyncPlugin
+version: ${project.version}
+api-version: 1.18
+api: "1.18"
+author: Craft Economy Team
+depend:
+  - craft-integration
+
+commands:
+  gencode:
+    description: generate a webapp code
+    usage: /<command>
