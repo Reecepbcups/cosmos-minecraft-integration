@@ -2,7 +2,7 @@ import { collections } from './database.service';
 
 // The options associated with connections
 type LinkOptions = {
-    discordId: string;
+    // discordId?: string;
     keplrId: string;
     minecraftId: string;
 };
@@ -15,11 +15,11 @@ type LinkOptions = {
 export const getLink = async (options: LinkOptions) => {
     let document;
 
-    if (options.discordId) {
-        // Get link by Discord
-        const discord = await collections?.connections?.find({ discordId: options.discordId }).tryNext();
-        if (discord) document = discord;
-    }
+    // if (options.discordId) {
+    //     // Get link by Discord
+    //     const discord = await collections?.connections?.find({ discordId: options.discordId }).tryNext();
+    //     if (discord) document = discord;
+    // }
 
     if (options.keplrId) {
         // Get links by Keplr id
@@ -61,9 +61,9 @@ export const deleteMCuuid = async (minecraftUUID: string) => {
 export const createLink = async (options: LinkOptions) => {
     // query the connections & find a document if any match
     const prev_document = await collections?.connections?.find({ $or: [
-        { discordId: options.discordId },
-        { keplrId: options.keplrId },
-        { minecraftId: options.minecraftId }
+        // { discordId: options.discordId },
+        { minecraftId: options.minecraftId },
+        // { keplrId: options.keplrId },
     ] }).tryNext();
 
     // either way a new document is going in, so delete old sync code as its been used.
@@ -78,7 +78,7 @@ export const createLink = async (options: LinkOptions) => {
     
     // console.log("Inserting new document: ", options);    
     return collections?.connections?.insertOne({
-        discordId: options.discordId,
+        // discordId: options.discordId,
         keplrId: options.keplrId,
         minecraftId: options.minecraftId
     });

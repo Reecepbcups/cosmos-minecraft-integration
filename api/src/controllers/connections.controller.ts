@@ -10,8 +10,10 @@ import { createLink, doesLinkExist, getMCUUID } from '../services/connections.se
  */
 export const createConnectionLink = async (req: Request, res: Response) => {
     // we not longer have to submit their minecraftId bc the minecraftCode -> the UUID, then we just insert that.
-    const { discordId, keplrId, minecraftCode } = req.body;
+    // const { discordId, keplrId, minecraftCode } = req.body;
     // console.log('MinecraftCode: ', minecraftCode);
+
+    const { keplrId, minecraftCode } = req.body;
 
     const myUUID = await getMCUUID(minecraftCode);
     if (!myUUID) return res.status(200).json('This secret code for syncing is not found for any minecraft account!');
@@ -22,7 +24,7 @@ export const createConnectionLink = async (req: Request, res: Response) => {
     // console.log('Minecraft ID: ', minecraftId);        
 
     const options = {
-        discordId: discordId ?? undefined,
+        // discordId: discordId ?? undefined,
         keplrId: keplrId ?? undefined,
         minecraftId: minecraftId ?? undefined
     };
