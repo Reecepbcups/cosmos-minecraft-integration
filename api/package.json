@@ -4,7 +4,7 @@
   "description": "The Craft Economy REST api, allowing outside access to our data.",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "dev": "ts-node src/index.ts",
     "watch": "nodemon src/index.ts",
     "build": "tsc --build"
   },
