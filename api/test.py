@@ -18,7 +18,7 @@ response = httpx.post(
     json={
         "secret": SECRET,
         "wallet": "juno10r39fueph9fq7a6lgswu4zdsg8t3gxlq670lt0",
-        "ucraft_amount": "100",
+        "ucraft_amount": "1",
     },
 )
 response = httpx.post(
@@ -26,7 +26,7 @@ response = httpx.post(
     json={
         "secret": SECRET,
         "wallet": "juno10r39fueph9fq7a6lgswu4zdsg8t3gxlq670lt0",
-        "ucraft_amount": "13",
+        "ucraft_amount": "2",
     },
 )
 

@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
 app.listen(API_PORT, async () => {
     console.log(`Started Integration REST API on port ${API_PORT}`);
 
-    let intervalSeconds = 1000 * 6;
+    let intervalSeconds = 1000 * 15;    
 
     // starting auto signing API process
     setInterval(async () => {

@@ -179,6 +179,7 @@ export const getBundledMessages = () => {
 
 // add a way to sign this and submit
 export const signAndBroadcastBundlePayment = async (secret: string) => {
+    // TODO: Ensure if height was already sent, we dont try to call again.
     if(assetProperSecret(secret) === false) {
         return {"error": "secret is incorrect"};
     }
@@ -208,16 +209,20 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
     const memo = "Payment from SERVER @ " + time + " with messages: " + messages.length;
     console.log(memo)
 
+    let allAccounts: string[] = [];
     try {
         console.log("DEBUG: " + account[0].address + " sending " + messages + " fee: " + fee);        
         result = await client.signAndBroadcast(account[0].address, messages, fee, memo);
         
-        assertIsDeliverTxSuccess(result);        
+        // assertIsDeliverTxSuccess(result);
+        for (const msg of messages) {
+            allAccounts.push(msg.value.to_address);
+        }
 
-        // console.log("Successfully broadcasted:", result.code, result.height, result.transactionHash, (result.rawLog).toString());
-        console.log("Successfully broadcasted bulk Txs:", result.code, result.height, result.transactionHash);
-        // return { "success": { "wallet": recipient_wallet, "ucraft_amount": ucraft_amount, "craft_amount": "999", "serverCraftBalLeft": "999", "transactionHash": result.transactionHash, "height": result.height } };
-
+        // clear messages
+        messages = [];
+        
+        console.log("Successfully broadcasted bulk Txs:", result.code, result.height, result.transactionHash);        
     } catch (err) {        
         // {"error":"{\"code\":-32603,\"message\":\"Internal error\",\"data\":\"tx already exists in cache\"}"}
         // TODO: save to DB to retry later
@@ -236,18 +241,10 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
         return { "error": { "code": code, "reason": reason, "hasEnoughFunds": hasEnoughFunds } };
     }
 
-    let allAccounts: string[] = [];
-    for (const msg of messages) {
-        allAccounts.push(msg.value.to_address);
-    }
-
 
     const res = {"success": { "transactionHash": result.transactionHash, "height": result.height, "payments": messages.length, "accounts": allAccounts } };
 
     // TODO: Push allAccounts to redis so we can subscribe to it in game and announce to players in the list as they get paid every X seconds.
-
-    // clear messages (Should this be here or ONLY if the Tx is success?)
-    messages = [];
 
     // return an array here of all sends / interacts that are NOT smart contracts?
     return res;
