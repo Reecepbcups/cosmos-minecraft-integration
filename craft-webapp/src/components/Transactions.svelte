@@ -7,9 +7,10 @@
 	import { success_notification, error_notification } from './Status.svelte';
 
 	// == Configuration ==
-	const rpcEndpoint = 'https://uni-rpc.reece.sh/';
-	const ENDPOINT = 'http://88.99.161.101:4000';
-	const CHAIN_ID = 'uni-6';
+	export let ENDPOINT: string;
+	export let CHAIN_ID: string;
+	export let rpcEndpoint: string;
+
 	let fee = { amount: [{ amount: '500', denom: 'ujunox' }], gas: '250000' };
 
 	// == Types== 
@@ -158,6 +159,10 @@
 			getPending(userAddress);
 		}}>Connect Wallet</button
 	>
+	
+	{#if pendingTxs.length === 0}
+		<h2>No Pending Transactions</h2>
+	{/if}
 
 	<!-- TODO: make these drop down boxes -->
 	<ul>

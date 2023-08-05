@@ -3,20 +3,24 @@
 	import { SvelteEasyToast } from 'svelte-easy-toast';
 
 	import Transactions from '../components/Transactions.svelte';
+	import MinecraftAuthentication from '../components/MinecraftAuth.svelte';
 
 	import { page } from '$app/stores';		
 
 	const fee = {amount: [{	amount: "100000",	denom: "ujuno",},], gas: "200000",};
 		
-	const rpcEndpoint = "https://uni-rpc.reece.sh/"					
+	const rpcEndpoint = "https://uni-rpc.reece.sh/"
+	const ENDPOINT = 'http://88.99.161.101:4000';
+	const CHAIN_ID = 'uni-6';			
 
 	let allowed_pages = new Map([
 		['main', 'Main Page'],
+		['auth', 'Authentication'],
 	]);
 
 	export let selectedTab = $page.url.searchParams.get('page')?.toLowerCase() || 'main';
 	if (selectedTab === null) { 
-		selectedTab = 'feeshare';
+		selectedTab = 'main';
 	} else if(!allowed_pages.has(selectedTab)) {
 		selectedTab = 'NOT_FOUND';
 	}
@@ -40,7 +44,7 @@
 
 <div>
 	<!-- Future: We can allow for multiple tabs of actions -->
-	<!-- <div class="nav-bar">
+	<div class="nav-bar">
 		{#each [...allowed_pages] as [page, name]}
 			<button class="nav-button {selectedTab === page ? 'selected' : ''}" on:click={() => {
 				selectedTab = page
@@ -48,22 +52,16 @@
 				setPageUrl(page);
 			}}>{name}</button>
 		{/each}		
-	</div> -->
+	</div>
 
 
 	<div class="page">
 
 		<div class="page-container">
 			{#if selectedTab === 'main'}
-				<Transactions />
-			<!-- {#if selectedTab === 'feeshare'}
-				<FeeShare rpcEndpoint={rpcEndpoint} fee={fee} />
-			{:else if selectedTab === 'tokenfactory'}
-				<TokenFactory rpcEndpoint={rpcEndpoint} fee={fee} />
-			{:else if selectedTab === 'migration'}	
-				<Migration />
-			{:else if selectedTab === 'usermigrate'}	
-				<UserMigration />			 -->
+				<Transactions CHAIN_ID={CHAIN_ID} ENDPOINT={ENDPOINT} rpcEndpoint={rpcEndpoint}/>
+			{:else if selectedTab === 'auth'}
+				<MinecraftAuthentication CHAIN_ID={CHAIN_ID} ENDPOINT={ENDPOINT} />
 			{:else if selectedTab === 'NOT_FOUND'}
 				<br>
 				<center>
@@ -87,13 +85,13 @@
 		position: relative;
 	}
 
-	/* .nav-bar {
+	.nav-bar {
 		padding-top: 50px;
 		left: 0px;
 		grid-template-columns: 20% 20% 20% 20% 20%;
 		display: grid;
 		width: 100%;
-	} */
+	}
 
 	.page-container {
 		width: 100%;
