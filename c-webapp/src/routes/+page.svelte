@@ -1,14 +1,9 @@
 <script lang="ts">
     import Navigation from '../components/Navigation.svelte'
     import Transactions from '../components/Transactions.svelte'
-    import MCAuth from '../components/MinecraftAuth.svelte'
-
-    import { SvelteToast } from '@zerodevx/svelte-toast'    
-
-    import { rpcEndpoint, ENDPOINT, CHAIN_ID } from '../lib/index'
-
-    import { Footer, FooterCopyright, FooterLinkGroup, FooterLink } from 'flowbite-svelte'
-
+    import MCAuth from '../components/MinecraftAuth.svelte'    
+	import Faucet from '../components/Faucet.svelte';
+    
     let currentPath = "/";
 </script>
 
@@ -24,6 +19,8 @@
         <Transactions />
     {:else if currentPath === "/auth"}
         <MCAuth />
+    {:else if currentPath === "/faucet"}
+        <Faucet />
     {/if}    
 </div>
 

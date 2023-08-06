@@ -9,7 +9,8 @@
 
     const routes = new Map([
         ['/', 'Transactions'],
-        ['/auth', 'Authentication']
+        ['/auth', 'Authentication'],
+        ['/faucet', 'Faucet']
     ])
      
     export let activeTab: string;
