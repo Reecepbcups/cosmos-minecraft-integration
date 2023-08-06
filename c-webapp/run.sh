@@ -1,2 +1,4 @@
 # production
-git pull && npm i && npm run build && npm run preview
+while true; do
+    git pull && npm i && npm run production
+done
