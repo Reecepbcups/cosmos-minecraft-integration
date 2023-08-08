@@ -4,8 +4,9 @@ cd api
 
 # screen -S api
 
-# while true, run npm run dev
-while :
-do
-  npm run dev
+npm run build
+
+# TODO: move to pm2, but how to do so with .env files hmm
+while true; do
+  npm run production
 done
