@@ -71,6 +71,11 @@ export const getAllTransactions = async (wallet: string) => {
     // Return first result
     for await (const member of foundKeys) {
         const foundValue = await redisClient.get(member) || ''
+
+        // ensure foundValue is valid json
+        if(foundValue.length === 0) { continue; }
+        if(foundValue[0] !== '{') { continue; }        
+
         results[member.split('_')[2]] = JSON.parse(foundValue);
     }
 
