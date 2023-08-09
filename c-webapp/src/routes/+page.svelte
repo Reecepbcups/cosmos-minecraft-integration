@@ -3,6 +3,7 @@
     import Transactions from '../components/Transactions.svelte'
     import MCAuth from '../components/MinecraftAuth.svelte'    
 	import Faucet from '../components/Faucet.svelte';
+	import Guide from '../components/Guide.svelte';
     
     let currentPath = "/";
 </script>
@@ -21,6 +22,8 @@
         <MCAuth />
     {:else if currentPath === "/faucet"}
         <Faucet />
+    {:else if currentPath === "/guide"}
+        <Guide />
     {/if}    
 </div>
 
