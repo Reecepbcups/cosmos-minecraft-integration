@@ -16,6 +16,8 @@ export const get_wallet_for_chain = async (
         throw new Error('Keplr not found');
     }
 
+    // recomend the chain here
+    
     let s = signer(chain_id);
     return s;
 };

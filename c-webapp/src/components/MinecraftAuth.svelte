@@ -5,6 +5,10 @@
 	import { ENDPOINT, CHAIN_ID } from '../lib/index';
 
 	// Application Logic
+
+	import { page } from '$app/stores';
+	let inputCode = $page.url.searchParams.get('code');
+
 	let userAddress: string;
 
 	async function doConnection(keplrWallet: string, minecraftCode: string) {
@@ -53,7 +57,7 @@
 			});
 	}
 
-	let inputCode = '';
+
 </script>
 
 <main>
@@ -99,6 +103,11 @@
 			on:click={async () => {
 				const signer = await get_wallet_for_chain(CHAIN_ID);
 				userAddress = (await signer.getAccounts())[0].address;
+				
+				if (inputCode == null) {
+					error_notification('Minecraft Code cannot be empty');
+					return;
+				}
 
 				doConnection(userAddress, inputCode);
 			}}>Link wallet with Minecraft Code</button

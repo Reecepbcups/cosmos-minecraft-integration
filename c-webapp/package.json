@@ -38,6 +38,7 @@
 		"cosmjs-utils": "^0.1.0",
 		"flowbite": "^1.8.1",
 		"flowbite-svelte": "^0.40.2",
+		"svelte-markdown": "^0.3.0",
 		"tailwind-merge": "^1.14.0"
 	}
 }

@@ -1,33 +1,18 @@
 <script lang="ts">	
 	
+	import SvelteMarkdown from 'svelte-markdown'
+
 	async function getGithubGuide(): Promise<string> {
 		const url = `https://raw.githubusercontent.com/Reecepbcups/cosmossdk-minecraft-pvp-server/main/GUIDE.md`;		
 
-		const otherParams = {
-			headers: {
-				'content-type': 'application/json; charset=UTF-8'
-			},
-			method: 'GET'
-		};
-		fetch(url, {
-			...otherParams,			
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log(data);	
-				if(data.error) {					
-					return;
-				}
-				
-				return data;
-			})
-			.catch((err) => {
-				console.log(err);				
-				// error_notification(`Error: ${err.error}`);
-				return err.error;
-			});
+		// fetch the data from the url and return it
+		const response = await fetch(url);
+		if (response.ok) {
+			const text = await response.text();
+			return text;
+		}
 
-		return "";
+		return "Error loading guide from Github...";
 
 	}
 </script>
@@ -40,8 +25,8 @@
 		<!-- on load, run getGithubGuide -->
 		{#await getGithubGuide()}
 			<p>loading...</p>
-		{:then guide}
-			<p>{guide}</p>
+		{:then guide}			
+			<SvelteMarkdown source={guide}/>			
 		{:catch error}
 			<p>{error}</p>
 		{/await}
