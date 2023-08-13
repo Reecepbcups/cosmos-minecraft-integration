@@ -11,7 +11,9 @@
 	import { error_notification, success_notification } from '$lib/notifications';
 
 	// == Configuration ==
-	let isIntervalRunning = false;
+	let isIntervalRunning = false;	
+	const delay = 6; // seconds
+	let secondsTillRefresh = delay;
 
 	let fee = { amount: [{ amount: '500', denom: 'ujunox' }], gas: '250000' };
 
@@ -166,8 +168,9 @@
 		<div class="flex justify-between">
 			<h1 class="text-4xl font-bold text-gray-900 dark:text-white mx-auto mt-20">Transactions</h1>
 			<!-- {#if startSpinning} -->
-			<!-- {/if} -->
+			<!-- {/if} -->								
 		</div>
+
 
 		<!-- TODO: Filter by ID -->
 		<!-- <form>   
@@ -195,19 +198,33 @@
 
 						getPending(userAddress);
 						setInterval(() => {
-							getPending(userAddress);
-							isIntervalRunning = true;
-						}, 6000);
+							if(secondsTillRefresh <= 0) {
+								getPending(userAddress);
+								isIntervalRunning = true;							
+								secondsTillRefresh = delay+1;				
+							}
+
+							secondsTillRefresh--;
+						}, 1_000);
 					}}>Connect Wallet</button
 				>
 			</center>
 		{:else}
+
+			<center>
+				<p class="text-white text-sm mt-4">Auto refresh in {secondsTillRefresh} seconds</p>
+			</center>
+
 			{#if Object.entries(pendingTxs).length == 0}
 				<center>
 					<p class="text-white text-sm mt-4">No pending transactions for {userAddress}</p>
 				</center>
 			{/if}
 		{/if}
+
+
+
+		
 
 		{#each Object.entries(pendingTxs) as tx, idx}
 			<!-- make it 60% of the screen -->
