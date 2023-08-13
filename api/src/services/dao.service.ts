@@ -1,8 +1,6 @@
 import { redisClient, collections } from './database.service';
 import { sendDiscordWebhook } from './discord.service';
 
-import axios from 'axios'; // TODO: use QueryClient bankExtension to query totalSupply
-
 // https://cosmos.github.io/cosmjs/
 import { StdFee, assertIsDeliverTxSuccess, calculateFee, GasPrice, SigningStargateClient, StargateClient, QueryClient, DeliverTxResponse } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
@@ -10,10 +8,19 @@ import { coin, coins, Coin } from "@cosmjs/amino";
 import { fromBech32, toBech32, toHex } from "@cosmjs/encoding";
 
 const WALLET_PREFIX = "juno";
+
+// == testnet ==
 const DENOM = "ujunox";
 const DENOM_NAME = "junox";
 const GAS_PRICES = 0.0025
-const GAS = 200_000
+const BASE_GAS = 75_000
+const PER_MSG_GAS = 50_000
+// == mainnet ==
+// const DENOM = "ujuno";
+// const DENOM_NAME = "juno";
+// const GAS_PRICES = 0.075
+// const BASE_GAS = 100_000
+// const PER_MSG_GAS = 50_000
 
 // Env
 import { config } from 'dotenv';
@@ -200,13 +207,14 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
     console.log(account[0].address);
 
     let result: DeliverTxResponse;
-
-    const time = new Date().toISOString();
+    
     // const coins_amt = coins(ucraft_amount, DENOM);
     const gasPrice = GasPrice.fromString(GAS_PRICES.toString() + DENOM);
-    const fee = calculateFee(GAS, gasPrice);
+
+    const gasCost = BASE_GAS + (messages.length * PER_MSG_GAS)
+    const fee = calculateFee(gasCost, gasPrice);
    
-    const memo = "Payment from SERVER @ " + time + " with messages: " + messages.length;
+    const memo = "Payment from SERVER @ " + new Date().toISOString() + " with messages: " + messages.length;
     console.log(memo)
 
     let allAccounts: string[] = [];
@@ -251,7 +259,6 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
 }
     
 
-// TODO: I should batch these every X blocks or something.
 /**
  * https://github.com/cosmos/cosmjs/blob/main/packages/cli/examples/local_faucet.ts
  * 
@@ -284,7 +291,7 @@ export const makePayment = async (secret: string, recipient_wallet: string, ucra
     const time = new Date().toISOString();
     const coins_amt = coins(ucraft_amount, DENOM);
     const gasPrice = GasPrice.fromString(GAS_PRICES.toString() + DENOM);
-    const fee = calculateFee(GAS, gasPrice);
+    const fee = calculateFee(BASE_GAS+PER_MSG_GAS, gasPrice);
     let result;    
 
     try {
