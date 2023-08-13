@@ -1,10 +1,11 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-export const rpcEndpoint = "https://uni-rpc.reece.sh/"
-export const ENDPOINT = 'https://craft-api.reece.sh';
-export const FAUCET = 'https://faucet.reece.sh';
-export const CHAIN_ID = 'uni-6';
+const isTestnet = true;
 
-export const EXPLORER_TX = 'https://testnet.mintscan.io/juno-testnet/txs';
+export const CHAIN_ID = isTestnet ? "uni-6" : "juno-1";
+export const EXPLORER_TX = isTestnet ? "https://testnet.mintscan.io/juno-testnet/txs" : "https://mintscan.io/juno/transactions";
+export const rpcEndpoint = isTestnet ? "https://uni-rpc.reece.sh/" : "https://rpc.juno.strange.love/";
+export const ENDPOINT = 'https://craft-api.reece.sh';
+export const FAUCET = isTestnet ? 'https://faucet.reece.sh' : 'Faucet Is Disabled';
 
 
