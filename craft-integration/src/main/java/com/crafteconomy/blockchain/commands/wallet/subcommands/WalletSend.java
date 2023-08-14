@@ -36,13 +36,18 @@ public class WalletSend implements SubCommand {
         }
 
         if(args.length < 3) {
-            Util.colorMsg(sender, "&cUsage: /wallet send <player|UUID|wallet> <amount>");
+            Util.colorMsg(sender, "&cUsage: /wallet send <player|wallet> <amount>");
             return;
         }
 
         // FROM & TO wallet addresses (craftxxxxxxx...)
         final String FROM = walletManager.getAddress(((Player)sender).getUniqueId());
-        final String TO = walletManager.getAddressFromName(args[1]);
+        String TO = walletManager.getAddressFromName(args[1]);
+
+        if(FROM == null) {
+            Util.colorMsg(sender, "&c&lERROR: &fPlease use &a/wallet "+args[0]+" <wallet> &fto set your wallet.");
+            return;
+        }  
 
         final long CRAFT_AMOUNT;
         try {
@@ -52,26 +57,27 @@ public class WalletSend implements SubCommand {
         } catch (Exception e) {
             Util.colorMsg(sender, "&c&lInvalid amount " + args[2]);
             return;
-        }         
-        
-        if(FROM == null) {
-            Util.colorMsg(sender, "&c&lERROR: &fPlease use &a/wallet "+args[0]+" <wallet> &fto set your wallet.");
-            return;
-        }  
+        }                 
         
         if(TO == null) {
-            Util.colorMsg(sender, "&c&lERROR: &f" + args[1] + " &fdoes not have a valid wallet set.");
+            // if the argument is not a valid wallet, then error out.
+            if(!args[1].startsWith(plugin.getWalletPrefix()) && (args[1].length() != plugin.getWalletLength())) {
+                Util.colorMsg(sender, "&c&lERROR: &f" + args[1] + " &fdoes not have a valid wallet set.");
 
-            Player target = Bukkit.getPlayer(args[1]);
-            if(target != null) {
-                Util.colorMsg(sender, "\n&4&l[!]] &n" + target.getName() + " &fhas tried sending you money");
-                Util.colorMsg(sender, "&4&l[!]] &cBut you do not have an active wallet set!");
-                Util.colorMsg(sender, "&4&l[!]] &f&a/wallet "+args[0]+" <wallet>");
-            } else {
-                Util.colorMsg(sender, "&fInform them too &7&o/wallet set <wallet> next time they are on");
+                Player target = Bukkit.getPlayer(args[1]);
+                if(target != null) {
+                    Util.colorMsg(sender, "\n&4&l[!]] &n" + target.getName() + " &fhas tried sending you money");
+                    Util.colorMsg(sender, "&4&l[!]] &cBut you do not have an active wallet set!");
+                    Util.colorMsg(sender, "&4&l[!]] &f&a/wallet "+args[0]+" <wallet>");
+                } else {
+                    Util.colorMsg(sender, "&fInform them too &7&o/wallet set <wallet> next time they are on");
+                }
+
+                return;
             }
-            
-            return;
+
+            // set the to address to the wallet
+            TO = args[1];                        
         }
     
         Player player = (Player) sender;
@@ -93,7 +99,7 @@ public class WalletSend implements SubCommand {
 
         Util.colorMsg(sender, "\nTx for " + CRAFT_AMOUNT + plugin.getTokenDenomName() + "->" + TO.subSequence(0, 16) + "...");
         IntegrationAPI.getInstance().sendTxIDClickable(sender, txInfo.getTxID().toString());
-        IntegrationAPI.getInstance().sendWebappForSigning(sender, FROM);
+        IntegrationAPI.getInstance().sendWebappForSigning(sender, "\n&6&l[!] &eClick here to sign your transaction(s)");
     }
 
     private Consumer<UUID> getConsumerMessage(String message) {
