@@ -2,19 +2,29 @@ import { redisClient, collections } from './database.service';
 import { sendDiscordWebhook } from './discord.service';
 
 // https://cosmos.github.io/cosmjs/
-import { StdFee, assertIsDeliverTxSuccess, calculateFee, GasPrice, SigningStargateClient, StargateClient, QueryClient, DeliverTxResponse } from "@cosmjs/stargate";
+import { assertIsDeliverTxSuccess, calculateFee, GasPrice, SigningStargateClient, StargateClient, QueryClient, DeliverTxResponse } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
-import { coin, coins, Coin } from "@cosmjs/amino";
-import { fromBech32, toBech32, toHex } from "@cosmjs/encoding";
+import { coin, coins } from "@cosmjs/amino";
+import { fromBech32 } from "@cosmjs/encoding";
 
-const WALLET_PREFIX = "juno";
+// Env
+import { config } from 'dotenv';
+config();
+
+const WALLET_PREFIX = `${process.env.CRAFT_WALLET_PREFIX}` || "craft";
+const DENOM = `${process.env.CRAFT_DENOM}` || "ucraft";
+const DENOM_NAME = `${process.env.CRAFT_DENOM_NAME}` || "ucraft";
+const GAS_PRICES = `${process.env.CRAFT_GAS_PRICES}` || "0.0025"
+const BASE_GAS = Number(`${process.env.CRAFT_BASE_GAS}`) || 75_000
+const PER_MSG_GAS = Number(`${process.env.CRAFT_PER_MSG_GAS}`) || 50_000
 
 // == testnet ==
-const DENOM = "ujunox";
-const DENOM_NAME = "junox";
-const GAS_PRICES = 0.0025
-const BASE_GAS = 75_000
-const PER_MSG_GAS = 50_000
+// const DENOM = "ujunox";
+// const DENOM_NAME = "junox";
+// const GAS_PRICES = 0.0025
+// const BASE_GAS = 75_000
+// const PER_MSG_GAS = 50_000
+
 // == mainnet ==
 // const DENOM = "ujuno";
 // const DENOM_NAME = "juno";
@@ -22,9 +32,7 @@ const PER_MSG_GAS = 50_000
 // const BASE_GAS = 100_000
 // const PER_MSG_GAS = 50_000
 
-// Env
-import { config } from 'dotenv';
-config();
+
 
 // create boolean to disable caching
 const allowCache = false;
