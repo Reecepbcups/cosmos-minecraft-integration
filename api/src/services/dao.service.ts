@@ -222,7 +222,7 @@ export const signAndBroadcastBundlePayment = async (secret: string) => {
     const gasCost = BASE_GAS + (messages.length * PER_MSG_GAS)
     const fee = calculateFee(gasCost, gasPrice);
    
-    const memo = "Payment from SERVER @ " + new Date().toISOString() + " with messages: " + messages.length;
+    const memo = "(https://craft-app.reece.sh) Payment from MINECRAFT SERVER @ " + new Date().toISOString() + " with payments: " + messages.length;
     console.log(memo)
 
     let allAccounts: string[] = [];
