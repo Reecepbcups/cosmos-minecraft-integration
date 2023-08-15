@@ -7,7 +7,7 @@
 	import type { EncodeObject } from '@cosmjs/proto-signing';
 	import { SigningStargateClient, type DeliverTxResponse } from '@cosmjs/stargate';
 
-	import { ENDPOINT, CHAIN_ID, rpcEndpoint, EXPLORER_TX } from '../lib/index';
+	import { ENDPOINT, DENOM, FEE_AMT, GAS_AMT, CHAIN_ID, rpcEndpoint, EXPLORER_TX } from '../lib/index';
 	import { error_notification, success_notification } from '$lib/notifications';
 
 	// == Configuration ==
@@ -15,7 +15,7 @@
 	const delay = 6; // seconds
 	let secondsTillRefresh = delay;
 
-	let fee = { amount: [{ amount: '500', denom: 'ujunox' }], gas: '250000' };
+	let fee = { amount: [{ amount: FEE_AMT, denom: DENOM }], gas: GAS_AMT };
 
 	// == Types==
 	interface Tx {
