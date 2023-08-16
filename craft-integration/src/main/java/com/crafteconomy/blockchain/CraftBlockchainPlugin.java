@@ -43,13 +43,6 @@ import redis.clients.jedis.Jedis;
 // notify-keyspace-events = "KEA" in /etc/redis/redis.conf
 
 public class CraftBlockchainPlugin extends JavaPlugin {
-
-    // TODO: config.yml
-    private static final String WALLET_PREFIX = "juno";    
-    private static final String TOKEN_DENOM = "ujunox";    
-    private static final String TOKEN_DENOM_NAME = "Juno";    
-
-
     private static CraftBlockchainPlugin instance;
 
     private static RedisManager redisDB;
@@ -63,6 +56,10 @@ public class CraftBlockchainPlugin extends JavaPlugin {
     // TODO: Change this to be in the API itself.
     private String DAO_SERVER_WALLET = null;
     private String REST_API_WALLET_ADDRESS = null;
+
+    private static String WALLET_PREFIX = "juno";    
+    private static String TOKEN_DENOM = "ujunox";    
+    private static String TOKEN_DENOM_NAME = "Juno";   
 
     private String INTERNAL_API = null;
     private String API_MAKE_PAYMENT_ENDPOINT = INTERNAL_API + "/v1/dao/make_payment";
@@ -110,6 +107,11 @@ public class CraftBlockchainPlugin extends JavaPlugin {
             log("INTERNAL_API does not start with http, adding it now. May fail who knows. Update this", Level.SEVERE);
             INTERNAL_API = "http://" + INTERNAL_API;
         }
+
+        WALLET_PREFIX = getConfig().getString("WALLET_PREFIX");
+        TOKEN_DENOM = getConfig().getString("TOKEN_DENOM");
+        TOKEN_DENOM_NAME = getConfig().getString("TOKEN_DENOM_NAME");
+        ADMIN_PERM = getConfig().getString("ADMIN_PERM");
 
         DAO_SERVER_WALLET = getConfig().getString("DAO_TAX_WALLET_ADDRESS"); // DAO_TAX_WALLET_ADDRESS
         REST_API_WALLET_ADDRESS = getConfig().getString("REST_API_WALLET_ADDRESS");

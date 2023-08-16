@@ -1,6 +1,12 @@
 # Ensure redis-cli -> `CONFIG SET notify-keyspace-events K$` (KEA also works)
 # notify-keyspace-events = "KEA" in /etc/redis/redis.conf
 
+WALLET_PREFIX: "juno"
+TOKEN_DENOM: "ujunox"
+TOKEN_DENOM_NAME: "Juno"
+
+ADMIN_PERM: "crafteconomy.admin"
+
 # http://api.crafteconomy.io/v1/dao/escrow_account_info
 REST_API_WALLET_ADDRESS: juno1efd63aw40lxf3n4mhf7dzhjkr453axurv2zdzk
 # DAO Mutlisig account
@@ -25,3 +31,4 @@ MongoDB:
 Redis:
   # uri: redis://:password@IP:6379
   uri: redis://localhost:6379
+
