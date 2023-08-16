@@ -35,7 +35,7 @@ public class WalletClearPending implements SubCommand {
             return;
         }
 
-        PendingTransactions.clearTransactionsFromWallet(wallet);
+        PendingTransactions.clearPendingTransactionsFromWallet(wallet);
         Util.colorMsg(sender, "&aSuccessfully cleared all your pending transactions.");  
     }          
 }

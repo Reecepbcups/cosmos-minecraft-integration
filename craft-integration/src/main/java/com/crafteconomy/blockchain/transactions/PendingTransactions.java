@@ -1,13 +1,14 @@
 package com.crafteconomy.blockchain.transactions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import com.crafteconomy.blockchain.CraftBlockchainPlugin;
 import com.crafteconomy.blockchain.storage.RedisManager;
-import com.crafteconomy.blockchain.utils.Util;
 
 import redis.clients.jedis.Jedis;
 
@@ -84,10 +85,47 @@ public class PendingTransactions {
         }
     }
 
+    public static List<UUID> getRedisTransactionsFromWallet(String wallet) {
+        List<UUID> txs = new ArrayList<>();
+        if(wallet == null) return txs;
 
+        try (Jedis jedis = RedisManager.getInstance().getRedisConnection()) {            
+            String key = "tx_"+wallet+"_*";
+
+            jedis.keys(key).forEach(k -> {                
+                try {
+                    System.out.println("Found " + key + " -> " + k);
+                    String[] split = k.split("_");
+                    String TxID = split[2];
+                    txs.add(UUID.fromString(TxID));
+                } catch (Exception e) {
+                    CraftBlockchainPlugin.log("[getTransactionsFromWallet] Failed to get txID from key " + k);
+                }
+            });            
+        } catch (Exception e) {
+            CraftBlockchainPlugin.log("[getTransactionsFromWallet] " + e.getMessage());            
+        }
+
+        return txs;
+    }
+
+    // expires them and deletes from redis / pending
+    public static void clearPendingTransactionsFromWallet(String wallet) {
+        for(UUID TxID : pending.keySet()) {            
+            Tx tx = pending.get(TxID);
+            if(tx.getFromWallet().equalsIgnoreCase(wallet)) {                     
+                PendingTransactions.getInstance().expireTransaction(TxID);                
+            }
+        }
+    }
+
+    // deprecated
     public static void clearTransactionsFromWallet(String wallet) {
         if(wallet == null) return;
-        // modified clearUncompletedTransactionsFromRedis function
+        
+
+        // List<UUID> txs = getRedisTransactionsFromWallet(wallet);
+
         try (Jedis jedis = RedisManager.getInstance().getRedisConnection()) {
             
             // deletes redis keys which are in pending keys since we do not save to DB
