@@ -1,8 +1,6 @@
 package com.crafteconomy.accountsync.command;
 
 import com.crafteconomy.accountsync.data.UserSyncCode;
-import com.crafteconomy.blockchain.CraftBlockchainPlugin;
-import com.crafteconomy.blockchain.api.IntegrationAPI;
 import com.crafteconomy.blockchain.utils.Util;
 
 import org.bukkit.command.Command;

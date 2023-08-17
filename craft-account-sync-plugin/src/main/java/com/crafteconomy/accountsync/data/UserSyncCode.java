@@ -64,8 +64,7 @@ public class UserSyncCode {
         // website/auth?code=XXXXX
         String URL = api.getWebAppAddress() + "auth?code=" + newCode;
 
-        Util.clickableCopy(player, newCode, "\n&aGenerated your sync code! &f&o&n(( Click to copy ))", "Click this text to copy it and paste to the webapp!");
-        
-        Util.clickableWebsite(player, URL, "&a&nClick here&a to visit our website to sync your account!\n", "Click to open");
+        // Util.clickableCopy(player, newCode, "\n&aGenerated your sync code! &f&o&n(( Click to copy ))", "Click this text to copy it and paste to the webapp!");
+        Util.clickableWebsite(player, URL, "\n&a&nClick here&a to visit our website to sync your account!\n", "Click to open");
     }
 }
