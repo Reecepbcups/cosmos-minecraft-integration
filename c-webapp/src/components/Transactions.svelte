@@ -245,9 +245,7 @@
 						/></svg
 					>
 					<span
-						>Type: {tx[1].tx_type} | Cost: {Number(tx[1].amount) / 1_000_000}
-						{denomToName(tx[1].denom)}</span
-					>
+						>Type: {tx[1].tx_type} | Cost: {Number(tx[1].amount) / 1_000_000} {denomToName(tx[1].denom)} | {cleanDescription(tx[1].description)}</span>
 
 					<!-- {#if isIntervalRunning && spinnerIdx === idx}
 						<div class="text-left"><Spinner color="green"/></div>
@@ -271,15 +269,17 @@
 						<li>Info: {cleanDescription(tx[1].description)}</li>
 						<li>From: {tx[1].from_address}</li>
 						<li>To: {tx[1].to_address}</li>
+						<!-- if tx[1].tax > 0 -->
+						{#if tx[1].tax.amount > 0}
+							<p class="mb-2 text-gray-500 dark:text-gray-400">
+								<!-- Tax: {tx[1].tax.amount}
+								{denomToName(tx[1].denom)} -->
+								<li>Tax: {tx[1].tax.amount/1_000_000} {denomToName(tx[1].denom)} ({(tx[1].tax.amount)/Number(tx[1].amount)*100}%) </li>
+							</p>
+						{/if}	
 					</ul>
 
-					<!-- if tx[1].tax > 0 -->
-					{#if tx[1].tax.amount > 0}
-						<p class="mb-2 text-gray-500 dark:text-gray-400">
-							Tax: {tx[1].tax.amount}
-							{denomToName(tx[1].denom)}
-						</p>
-					{/if}					
+									
 				</span>
 			</AccordionItem>
 		{/each}
