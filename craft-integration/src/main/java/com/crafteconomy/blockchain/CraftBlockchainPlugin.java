@@ -123,7 +123,7 @@ public class CraftBlockchainPlugin extends JavaPlugin {
         TAX_RATE = getConfig().getDouble("TAX_RATE");
         if(TAX_RATE == null) TAX_RATE = 0.0;
 
-        REDIS_MINUTE_TTL = getConfig().getInt("TAX_RATE");
+        REDIS_MINUTE_TTL = getConfig().getInt("REDIS_MINUTE_TTL");
         if(REDIS_MINUTE_TTL == null) REDIS_MINUTE_TTL = 30;
 
         DEV_MODE = getConfig().getBoolean("DEV_MODE");

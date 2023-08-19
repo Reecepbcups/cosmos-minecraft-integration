@@ -19,6 +19,7 @@ API_MAKE_PAYMENT_ENDPOINT: http://localhost:4000/v1/dao/make_payment
 REDIS_KEY_EXPIRE_TIME: 0
 TX_QUERY_ENDPOINT: https://api.juno.strange.love/cosmos/tx/v1beta1/txs/{TENDERMINT_HASH}
 TAX_RATE: 0.05
+REDIS_MINUTE_TTL: 30
 DEV_MODE: false
 DEBUGGING_MSGS: true
 API_ENDPOINT: https://api.juno.strange.love/
